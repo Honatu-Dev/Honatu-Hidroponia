@@ -19,7 +19,11 @@ const connectDB = async () => {
     await sequelize.authenticate();
     console.log('PostgreSQL Connected successfully via Sequelize.');
     
-    // Auto-sync models (use with caution in production)
+    // Importar los modelos para que Sequelize sepa que existen
+    await import('../models/index.js');
+
+    // Auto-sync models (sincroniza las tablas con PostgreSQL automáticamente)
+    // DESCOMENTA LA SIGUIENTE LÍNEA cuando tengas tu BD encendida por primera vez:
     // await sequelize.sync({ alter: true });
   } catch (error) {
     console.error('Unable to connect to the database:', error);

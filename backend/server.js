@@ -4,13 +4,13 @@ import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 
 // Rutas
+import authRoutes from './src/routes/auth.routes.js';
 // import productRoutes from './src/routes/product.routes.js';
 
 dotenv.config();
 
 // Conectar a Base de Datos
-// (Comentado temporalmente hasta que configures PostgreSQL)
-// connectDB();
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,6 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // Middlewares de rutas
+app.use('/api/auth', authRoutes);
 // app.use('/api/productos', productRoutes);
 
 // Ruta básica de salud
