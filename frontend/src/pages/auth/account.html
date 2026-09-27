@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Cuenta | Honatu Insumos Hidropónicos</title>
+  <meta name="description"
+    content="Gestiona tu información personal, consulta tus pedidos y edita tus direcciones de envío en Honatu.">
+
+  <!-- Google Fonts: Besley (Display/Heading) & Plus Jakarta Sans (Body/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Besley:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Shared stylesheets -->
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/pages/subpage.css">
+  <link rel="stylesheet" href="../../css/pages/ecommerce.css">
+  <link rel="icon" href="../../assets/logo/Logo.png" type="image/png">
+  <script type="module" src="../../js/app.js"></script>
+
+  <style>
+    /* Account Page Styles */
+    .account-section {
+      padding: var(--space-3xl) 0 var(--space-5xl);
+    }
+
+    .account-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: var(--space-2xl);
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .account-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .account-sidebar {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-gray-200);
+      padding: var(--space-lg);
+      box-shadow: 0 4px 20px rgba(35, 78, 40, 0.04);
+    }
+
+    .account-user-card {
+      text-align: center;
+      padding-bottom: var(--space-lg);
+      margin-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+
+    .account-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--color-cream);
+      color: var(--color-forest);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      border: 2px solid var(--color-sage);
+    }
+
+    .account-user-name {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      color: var(--color-forest);
+      margin-bottom: 4px;
+    }
+
+    .account-user-email {
+      font-size: 0.85rem;
+      color: var(--color-gray-500);
+    }
+
+    .account-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .account-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      border: none;
+      color: var(--color-gray-600);
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all var(--duration-fast) ease;
+      width: 100%;
+    }
+
+    .account-nav-btn:hover {
+      background: var(--color-gray-100);
+      color: var(--color-forest);
+    }
+
+    .account-nav-btn.active {
+      background: var(--color-forest);
+      color: var(--color-white);
+    }
+
+    .account-nav-btn.active svg {
+      stroke: var(--color-white);
+    }
+
+    .account-card {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-gray-200);
+      padding: var(--space-2xl);
+      box-shadow: 0 4px 20px rgba(35, 78, 40, 0.04);
+    }
+
+    .account-tab-content {
+      display: none;
+    }
+
+    .account-tab-content.active {
+      display: block;
+    }
+
+    .account-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--color-forest);
+      margin-bottom: var(--space-xs);
+    }
+
+    .account-subtitle {
+      font-size: 0.9rem;
+      color: var(--color-gray-500);
+      margin-bottom: var(--space-xl);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Order items card */
+    .order-card {
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-md);
+      background: var(--color-cream-warm);
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-gray-200);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .order-id {
+      font-weight: 700;
+      color: var(--color-forest);
+      font-size: 1rem;
+    }
+
+    .badge-status {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      background: var(--color-sage-light);
+      color: var(--color-forest-dark);
+    }
+
+    .order-items-list {
+      font-size: 0.88rem;
+      color: var(--color-gray-600);
+      margin-bottom: 12px;
+    }
+
+    .order-items-list li {
+      margin-bottom: 4px;
+    }
+
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-forest);
+    }
+
+    /* Address card */
+    .address-card {
+      border: 1px solid var(--color-sage);
+      background: var(--color-off-white);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      position: relative;
+    }
+
+    .address-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--color-forest);
+      background: rgba(94, 130, 84, 0.15);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOADER -->
+  <div id="loader" class="loader" aria-hidden="false">
+    <div class="loader-inner">
+      <img src="../../assets/logo/Logo.png" alt="Honatu" class="loader-logo">
+      <div class="loader-bar">
+        <div class="loader-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav id="navbar" class="navbar navbar--solid" role="navigation">
+    <div class="nav-container">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <a href="../../index.html" class="nav-logo" aria-label="Inicio">
+          <img src="../../assets/logo/Logo.png" alt="Honatu">
+        </a>
+        <a href="../../index.html" class="btn-nav-back">&larr; Volver al Inicio</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="../shop/favorites.html" class="nav-cart" aria-label="Favoritos">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+            </path>
+          </svg>
+        </a>
+        <a href="../auth/account.html" class="nav-cart active" aria-label="Usuario">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+        <button id="cartToggle" class="nav-cart" aria-label="Carrito de compras">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 01-8 0" />
+          </svg>
+          <span id="cartBadge" class="cart-badge">0</span>
+        </button>
+        <button id="navHamburger" class="nav-hamburger" aria-label="Menú">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO CUENTA -->
+  <header class="hero" style="padding-top: 100px;">
+    <div class="hero-content">
+      <p class="eyebrow">Mi Perfil</p>
+      <h1>Mi Cuenta Honatu</h1>
+      <p>
+        Administra tus datos personales, consulta tus pedidos recientes y actualiza tus direcciones de envío.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section class="account-section">
+      <div class="container">
+        <div class="account-grid">
+
+          <!-- SIDEBAR TAB SWITCHER -->
+          <aside class="account-sidebar">
+            <div class="account-user-card">
+              <div class="account-avatar" id="profileDisplayAvatar">H</div>
+              <h3 class="account-user-name" id="profileDisplayName">Cliente Honatu</h3>
+              <p class="account-user-email" id="profileDisplayEmail">usuario@honatu.com</p>
+              <!-- <div id="adminBadgeContainer" style="margin-top: 8px; display: none;">
+                <a href="../admin/admin.html" class="btn btn-sm" style="background: var(--color-earth); color: var(--color-logo); font-size: 0.8rem; width: 100%; justify-content: center; border-radius: var(--radius-sm);">
+                  Panel de Administrador &rarr;
+                </a>
+              </div> -->
+            </div>
+
+            <nav class="account-nav">
+              <button class="account-nav-btn active" data-tab="tab-personal">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Datos Personales
+              </button>
+              <button class="account-nav-btn" data-tab="tab-orders">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+                Mis Pedidos
+              </button>
+              <button class="account-nav-btn" data-tab="tab-addresses">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                Direcciones de Envío
+              </button>
+              <button class="account-nav-btn" data-tab="tab-security">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Seguridad
+              </button>
+              <button id="logoutBtn" class="account-nav-btn" style="color: var(--color-terracotta); margin-top: 16px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-terracotta)"
+                  stroke-width="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Cerrar Sesión
+              </button>
+            </nav>
+          </aside>
+
+          <!-- MAIN CONTENT AREA -->
+          <div class="account-card">
+
+            <!-- TAB 1: DATOS PERSONALES -->
+            <div id="tab-personal" class="account-tab-content active">
+              <h2 class="account-title">Información Personal</h2>
+              <p class="account-subtitle">Actualiza tus nombres, correo de contacto y número telefónico.</p>
+
+              <form id="profileForm" class="login-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label" for="accFirstName">Nombre(s)</label>
+                    <input type="text" id="accFirstName" class="form-input" value="Carlos" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="accLastName">Apellidos</label>
+                    <input type="text" id="accLastName" class="form-input" value="Mendoza" required>
+                  </div>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label" for="accEmail">Correo Electrónico</label>
+                    <input type="email" id="accEmail" class="form-input" value="carlos.mendoza@ejemplo.com" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="accPhone">Teléfono de Contacto</label>
+                    <input type="tel" id="accPhone" class="form-input" value="+52 442 987 6543">
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Guardar Cambios &rarr;</button>
+              </form>
+            </div>
+
+            <!-- TAB 2: MIS PEDIDOS -->
+            <div id="tab-orders" class="account-tab-content">
+              <h2 class="account-title">Mis Pedidos</h2>
+              <p class="account-subtitle">Consulta el historial y estado de tus compras en Honatu.</p>
+
+              <div class="order-card">
+                <div class="order-header">
+                  <div>
+                    <span class="order-id">Orden #HON-9482</span>
+                    <span style="font-size: 0.8rem; color: var(--color-gray-500); margin-left: 8px;">24 de Julio
+                      2024</span>
+                  </div>
+                  <span class="badge-status">Entregado</span>
+                </div>
+                <ul class="order-items-list">
+                  <li>• 1x Solución Nutritiva A+B (1 L)</li>
+                  <li>• 2x Fibra de Coco Premium (10 L)</li>
+                </ul>
+                <div class="order-footer">
+                  <span>Total Pagado: $887 MXN</span>
+                  <a href="#" style="color: var(--color-forest); text-decoration: underline; font-size: 0.85rem;">Ver
+                    Detalle</a>
+                </div>
+              </div>
+
+              <div class="order-card">
+                <div class="order-header">
+                  <div>
+                    <span class="order-id">Orden #HON-8210</span>
+                    <span style="font-size: 0.8rem; color: var(--color-gray-500); margin-left: 8px;">10 de Junio
+                      2024</span>
+                  </div>
+                  <span class="badge-status">Entregado</span>
+                </div>
+                <ul class="order-items-list">
+                  <li>• 1x Medidor pH/EC Digital de Precisión</li>
+                </ul>
+                <div class="order-footer">
+                  <span>Total Pagado: $599 MXN</span>
+                  <a href="#" style="color: var(--color-forest); text-decoration: underline; font-size: 0.85rem;">Ver
+                    Detalle</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: DIRECCIONES -->
+            <div id="tab-addresses" class="account-tab-content">
+              <h2 class="account-title">Direcciones de Envío</h2>
+              <p class="account-subtitle">Gestiona las ubicaciones donde deseas recibir tus pedidos.</p>
+
+              <div class="address-card">
+                <span class="address-badge">Dirección Predeterminada</span>
+                <h4 style="font-size: 1.05rem; color: var(--color-earth); margin-bottom: 6px;">Carlos Mendoza</h4>
+                <p style="font-size: 0.9rem; color: var(--color-gray-600); line-height: 1.5; margin-bottom: 12px;">
+                  Av. Universidad 120, Col. Centro<br>
+                  Santiago de Querétaro, Qro. CP 76000<br>
+                  Tel: +52 442 987 6543
+                </p>
+                <button class="btn btn-secondary btn-sm" style="font-size: 0.8rem; padding: 4px 14px;">Editar
+                  Dirección</button>
+              </div>
+            </div>
+
+            <!-- TAB 4: SEGURIDAD -->
+            <div id="tab-security" class="account-tab-content">
+              <h2 class="account-title">Seguridad</h2>
+              <p class="account-subtitle">Mantén tu cuenta protegida cambiando tu contraseña periódicamente.</p>
+
+              <form id="securityForm" class="login-form">
+                <div class="form-group">
+                  <label class="form-label" for="currPass">Contraseña Actual</label>
+                  <input type="password" id="currPass" class="form-input" required>
+                </div>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label" for="newPass">Nueva Contraseña</label>
+                    <input type="password" id="newPass" class="form-input" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="confirmPass">Confirmar Nueva Contraseña</label>
+                    <input type="password" id="confirmPass" class="form-input" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Actualizar Contraseña
+                  &rarr;</button>
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer"></footer>
+
+  <!-- AUTH & CART SHARED MODALS -->
+  <div id="loginOverlay" class="login-overlay"></div>
+  <div id="loginModal" class="login-modal" aria-hidden="true" role="dialog">
+    <div class="login-modal-content">
+      <button id="loginClose" class="login-close" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg></button>
+      <div class="login-header">
+        <h2 id="loginTitle">Inicia Sesión</h2>
+        <p id="loginSubtitle">Inicia sesión primero para poder comprar o guardar favoritos.</p>
+      </div>
+      <form id="loginForm" class="login-form">
+        <div class="form-group"><label class="form-label" for="loginEmail">Correo</label><input type="email"
+            id="loginEmail" class="form-input" required></div>
+        <div class="form-group"><label class="form-label" for="loginPassword">Contraseña</label><input type="password"
+            id="loginPassword" class="form-input" required></div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Ingresar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="cartOverlay" class="cart-overlay"></div>
+  <aside id="cartPanel" class="cart-panel" aria-label="Carrito de compras">
+    <div class="cart-header">
+      <h3>Tu Carrito</h3>
+      <button id="cartClose" class="cart-close" aria-label="Cerrar carrito"><svg width="20" height="20"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg></button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span class="cart-total-label">Total:</span><span id="cartTotal" class="cart-total-value">$0 MXN</span>
+      </div>
+      <a href="../shop/cart.html" class="btn btn-terracotta btn-checkout"
+        style="text-decoration: none; text-align: center;">Ver Carrito Completo &rarr;</a>
+    </div>
+  </aside>
+
+  <script type="module">
+    import { getAuthUser, isAdmin, logout } from '../../js/controllers/auth.controller.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getAuthUser();
+      if (user) {
+        document.getElementById('profileDisplayName').textContent = user.name || 'Cultivador Honatu';
+        document.getElementById('profileDisplayEmail').textContent = user.email || 'cliente@honatu.com';
+        const avatar = document.getElementById('profileDisplayAvatar');
+        if (avatar) avatar.textContent = (user.name || 'H').charAt(0).toUpperCase();
+
+        if (isAdmin()) {
+          const badgeCont = document.getElementById('adminBadgeContainer');
+          if (badgeCont) badgeCont.style.display = 'block';
+        }
+      }
+
+      const navBtns = document.querySelectorAll('.account-nav-btn[data-tab]');
+      const tabContents = document.querySelectorAll('.account-tab-content');
+
+      navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetTab = btn.getAttribute('data-tab');
+
+          navBtns.forEach(b => b.classList.remove('active'));
+          tabContents.forEach(c => c.classList.remove('active'));
+
+          btn.classList.add('active');
+          document.getElementById(targetTab)?.classList.add('active');
+        });
+      });
+
+      const profileForm = document.getElementById('profileForm');
+      if (profileForm) {
+        profileForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const first = document.getElementById('accFirstName').value;
+          const last = document.getElementById('accLastName').value;
+          const email = document.getElementById('accEmail').value;
+
+          document.getElementById('profileDisplayName').textContent = `${first} ${last}`;
+          document.getElementById('profileDisplayEmail').textContent = email;
+
+          if (window.showToast) {
+            window.showToast("¡Información personal actualizada con éxito!");
+          }
+        });
+      }
+
+      const securityForm = document.getElementById('securityForm');
+      if (securityForm) {
+        securityForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          if (window.showToast) {
+            window.showToast("¡Contraseña actualizada correctamente!");
+          }
+          securityForm.reset();
+        });
+      }
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          logout('login.html');
+        });
+      }
+    });
+  </script>
+
+</body>
+
+</html>

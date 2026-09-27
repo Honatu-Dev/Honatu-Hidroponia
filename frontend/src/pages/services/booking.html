@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendar Visita | Honatu</title>
+  <meta name="description" content="Agenda una cita de asesoría especializada con los expertos en hidroponía de Honatu.">
+
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/pages/home.css">
+  <link rel="icon" href="../../assets/logo/Logo.png" type="image/png">
+
+  <script type="module" src="../../js/app.js"></script>
+</head>
+
+<body>
+
+  <!-- LOADER -->
+  <div id="loader" class="loader" aria-hidden="false">
+    <div class="loader-inner">
+      <img src="../../assets/logo/Logo.png" alt="Honatu" class="loader-logo">
+      <div class="loader-bar">
+        <div class="loader-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <honatu-header></honatu-header>
+
+  <main style="padding-top: var(--nav-height, 80px); background: var(--color-cream); min-height: 100vh;">
+    <!-- AGENDAR VISITA – ASESORÍA -->
+    <section id="agendar-visita" style="padding: var(--space-4xl) 0; background: var(--color-cream); border-top: 1px solid var(--color-gray-200);">
+      <div class="container" style="max-width: 960px;">
+        <div class="section-header reveal" style="text-align: center; margin-bottom: 2.5rem;">
+          <span class="section-eyebrow" style="justify-content: center; color: var(--color-terracotta);">Asesoría Especializada</span>
+          <h2 class="section-title" style="font-size: 2.3rem;">Agendar Visita</h2>
+          <p class="section-subtitle">Selecciona una fecha y horario disponible para tu sesión de asesoría técnica personalizada.</p>
+        </div>
+
+        <div class="reveal servicio-form-wrapper" data-delay="1"
+          style="background: var(--color-off-white); padding: var(--space-2xl); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); border: 1px solid var(--color-gray-200); position: relative; z-index: 1; overflow: visible;">
+
+          <!-- BOOKING LAYOUT -->
+          <div id="bookingLayout" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2xl); align-items: start;">
+
+            <!-- LEFT: Calendar + Time Slots -->
+            <div>
+              <!-- Mini Calendar -->
+              <div style="margin-bottom: var(--space-xl);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md);">
+                  <button type="button" id="calPrev" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--color-forest); padding: 4px 8px;" aria-label="Mes anterior">&lsaquo;</button>
+                  <span id="calMonthYear" style="font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: var(--color-forest);"></span>
+                  <button type="button" id="calNext" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--color-forest); padding: 4px 8px;" aria-label="Mes siguiente">&rsaquo;</button>
+                </div>
+                <div id="calGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;"></div>
+              </div>
+
+              <!-- Time Slots -->
+              <div>
+                <p style="font-weight: 600; color: var(--color-forest); margin-bottom: var(--space-sm); font-size: 0.95rem;">
+                  <span id="selectedDateLabel" style="color: var(--color-terracotta);">Selecciona una fecha</span>
+                </p>
+                <div id="timeSlots" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"></div>
+              </div>
+            </div>
+
+            <!-- RIGHT: Visit Details Form -->
+            <div>
+              <div style="background: var(--color-white); border-radius: var(--radius-lg); padding: var(--space-xl); border: 1px solid var(--color-gray-200);">
+                <h3 style="font-family: var(--font-display); font-size: 1.2rem; color: var(--color-forest); margin-bottom: var(--space-xs);">Detalles de la Visita</h3>
+                <p id="bookingSummary" style="font-size: 0.88rem; color: var(--color-sage); font-weight: 600; margin-bottom: var(--space-lg); line-height: 1.5; min-height: 40px;">
+                  Completa la fecha y horario para continuar.
+                </p>
+
+                <form id="bookingForm" style="display: flex; flex-direction: column; gap: var(--space-md);">
+                  <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                    <label for="book-name" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Nombre Completo *</label>
+                    <input type="text" id="book-name" required placeholder="Tu nombre y apellido"
+                      style="padding: 10px 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; color: var(--color-forest); background: var(--color-off-white); transition: border 0.2s ease;"
+                      onfocus="this.style.borderColor='var(--color-sage)'" onblur="this.style.borderColor='var(--color-gray-200)'">
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                    <label for="book-email" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Correo Electrónico *</label>
+                    <input type="email" id="book-email" required placeholder="correo@ejemplo.com"
+                      style="padding: 10px 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; color: var(--color-forest); background: var(--color-off-white); transition: border 0.2s ease;"
+                      onfocus="this.style.borderColor='var(--color-sage)'" onblur="this.style.borderColor='var(--color-gray-200)'">
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                    <label for="book-phone" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Teléfono / WhatsApp *</label>
+                    <input type="tel" id="book-phone" required placeholder="+52 442 123 4567"
+                      style="padding: 10px 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; color: var(--color-forest); background: var(--color-off-white); transition: border 0.2s ease;"
+                      onfocus="this.style.borderColor='var(--color-sage)'" onblur="this.style.borderColor='var(--color-gray-200)'">
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                    <label for="book-location" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Ubicación del proyecto *</label>
+                    <input type="text" id="book-location" required placeholder="Ciudad / Colonia"
+                      style="padding: 10px 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; color: var(--color-forest); background: var(--color-off-white); transition: border 0.2s ease;"
+                      onfocus="this.style.borderColor='var(--color-sage)'" onblur="this.style.borderColor='var(--color-gray-200)'">
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                    <label for="book-type" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Tipo de asesoría</label>
+                    <select id="book-type"
+                      style="padding: 10px 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; color: var(--color-forest); background: var(--color-off-white);">
+                      <option value="diagnostico">Diagnóstico de cultivo existente</option>
+                      <option value="nuevo-proyecto">Nuevo proyecto hidropónico</option>
+                      <option value="plagas">Control preventivo de plagas</option>
+                      <option value="nutricion">Fórmulas nutricionales</option>
+                      <option value="optimizacion">Optimización de producción</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                    <label for="book-notes" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Notas adicionales</label>
+                    <textarea id="book-notes" rows="3" placeholder="Describe brevemente tu proyecto o tus plantas actuales..."
+                      style="padding: 10px 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; resize: vertical; color: var(--color-forest); background: var(--color-off-white); transition: border 0.2s ease;"
+                      onfocus="this.style.borderColor='var(--color-sage)'" onblur="this.style.borderColor='var(--color-gray-200)'"></textarea>
+                  </div>
+
+                  <button type="submit" id="bookSubmitBtn" class="btn btn-primary" disabled
+                    style="width: 100%; justify-content: center; background: #D36A44; border-color: #D36A44; margin-top: var(--space-sm); opacity: 0.5; cursor: not-allowed; transition: opacity 0.3s ease;">
+                    Confirmar Cita &rarr;
+                  </button>
+                  <p style="font-size: 0.8rem; color: var(--color-gray-400); text-align: center;">Te enviaremos confirmación por correo y WhatsApp</p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer"></footer>
+
+  <style>
+    /* Calendar Styles */
+    .cal-header-cell {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 0;
+    }
+    .cal-day {
+      width: 100%;
+      aspect-ratio: 1;
+      border: none;
+      background: none;
+      border-radius: var(--radius-md, 8px);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--color-forest);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cal-day:hover:not(.cal-day--disabled):not(.cal-day--selected) {
+      background: rgba(94, 130, 84, 0.1);
+    }
+    .cal-day--today {
+      font-weight: 700;
+      color: var(--color-terracotta);
+    }
+    .cal-day--selected {
+      background: var(--color-forest) !important;
+      color: var(--color-white) !important;
+      font-weight: 700;
+    }
+    .cal-day--disabled {
+      color: var(--color-gray-300);
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+    .cal-day--other-month {
+      color: var(--color-gray-300);
+    }
+    .time-slot-btn {
+      padding: 10px 12px;
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: var(--radius-md, 8px);
+      background: var(--color-white);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-forest);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .time-slot-btn:hover {
+      border-color: var(--color-sage);
+      background: rgba(94, 130, 84, 0.06);
+    }
+    .time-slot-btn.selected {
+      border-color: var(--color-forest);
+      background: var(--color-forest);
+      color: var(--color-white);
+    }
+
+    /* Responsive booking layout */
+    @media (max-width: 768px) {
+      #bookingLayout {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* FIXING VINES OVERLAP AND ALIGNMENT */
+    #agendar-visita #bookingLayout {
+      position: relative;
+      z-index: 12;
+    }
+  </style>
+
+  <script>
+    // ============ BOOKING CALENDAR ============
+    (function() {
+      let currentMonth, currentYear, selectedDate = null, selectedTime = null;
+      const today = new Date();
+      currentMonth = today.getMonth();
+      currentYear = today.getFullYear();
+
+      const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const TIME_SLOTS = ['9:00 am','9:30 am','10:00 am','10:30 am','11:00 am','11:30 am','12:00 pm','12:30 pm','1:00 pm'];
+
+      function renderCalendar() {
+        const grid = document.getElementById('calGrid');
+        const label = document.getElementById('calMonthYear');
+        if (!grid || !label) return;
+
+        label.textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+        grid.innerHTML = '';
+
+        // Header row
+        DAYS.forEach(d => {
+          const cell = document.createElement('div');
+          cell.className = 'cal-header-cell';
+          cell.textContent = d;
+          grid.appendChild(cell);
+        });
+
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
+
+        // Previous month's trailing days
+        for (let i = firstDay - 1; i >= 0; i--) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'cal-day cal-day--other-month cal-day--disabled';
+          btn.textContent = daysInPrev - i;
+          btn.disabled = true;
+          grid.appendChild(btn);
+        }
+
+        // Current month days
+        for (let d = 1; d <= daysInMonth; d++) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'cal-day';
+          btn.textContent = d;
+
+          const dateObj = new Date(currentYear, currentMonth, d);
+          const dayOfWeek = dateObj.getDay();
+          const isPast = dateObj < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          const isSunday = dayOfWeek === 0;
+
+          if (isPast || isSunday) {
+            btn.classList.add('cal-day--disabled');
+            btn.disabled = true;
+          } else {
+            btn.addEventListener('click', () => selectDay(d));
+          }
+
+          if (d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+            btn.classList.add('cal-day--today');
+          }
+
+          if (selectedDate && selectedDate.getDate() === d && selectedDate.getMonth() === currentMonth && selectedDate.getFullYear() === currentYear) {
+            btn.classList.add('cal-day--selected');
+          }
+
+          grid.appendChild(btn);
+        }
+
+        // Next month's leading days
+        const totalCells = grid.children.length;
+        const remaining = (7 - ((totalCells - 7) % 7)) % 7;
+        for (let i = 1; i <= remaining; i++) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'cal-day cal-day--other-month cal-day--disabled';
+          btn.textContent = i;
+          btn.disabled = true;
+          grid.appendChild(btn);
+        }
+      }
+
+      function selectDay(day) {
+        selectedDate = new Date(currentYear, currentMonth, day);
+        selectedTime = null;
+        renderCalendar();
+        renderTimeSlots();
+        updateSummary();
+      }
+
+      function renderTimeSlots() {
+        const container = document.getElementById('timeSlots');
+        const label = document.getElementById('selectedDateLabel');
+        if (!container || !label) return;
+
+        if (!selectedDate) {
+          label.textContent = 'Selecciona una fecha';
+          container.innerHTML = '';
+          return;
+        }
+
+        const dayName = DAYS[selectedDate.getDay()];
+        const monthName = MONTHS[selectedDate.getMonth()];
+        label.textContent = `${dayName} ${selectedDate.getDate()} de ${monthName}`;
+
+        container.innerHTML = '';
+        TIME_SLOTS.forEach(time => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'time-slot-btn';
+          btn.textContent = time;
+          if (selectedTime === time) btn.classList.add('selected');
+          btn.addEventListener('click', () => {
+            selectedTime = time;
+            renderTimeSlots();
+            updateSummary();
+          });
+          container.appendChild(btn);
+        });
+      }
+
+      function updateSummary() {
+        const summary = document.getElementById('bookingSummary');
+        const submitBtn = document.getElementById('bookSubmitBtn');
+        if (!summary || !submitBtn) return;
+
+        if (selectedDate && selectedTime) {
+          const dayName = DAYS[selectedDate.getDay()];
+          const monthName = MONTHS[selectedDate.getMonth()];
+          summary.innerHTML = `
+            <strong style="color: var(--color-forest);">Asesoría Técnica Personalizada</strong><br>
+            Fecha: ${dayName} ${selectedDate.getDate()} de ${monthName}, ${currentYear}<br>
+            Hora: ${selectedTime}<br>
+            Visita presencial · 1 hr aprox.
+          `;
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        } else {
+          summary.textContent = 'Completa la fecha y horario para continuar.';
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const prevBtn = document.getElementById('calPrev');
+        const nextBtn = document.getElementById('calNext');
+
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderCalendar();
+          });
+        }
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+          });
+        }
+
+        renderCalendar();
+        renderTimeSlots();
+
+        // Booking form submit
+        const bookingForm = document.getElementById('bookingForm');
+        if (bookingForm) {
+          bookingForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!selectedDate || !selectedTime) return;
+
+            const dayName = DAYS[selectedDate.getDay()];
+            const monthName = MONTHS[selectedDate.getMonth()];
+            const dateStr = `${dayName} ${selectedDate.getDate()} de ${monthName}, ${currentYear}`;
+
+            if (window.showToast) {
+              window.showToast(`¡Cita agendada! ${dateStr} a las ${selectedTime}. Te contactaremos para confirmar.`);
+            } else {
+              alert(`¡Cita agendada exitosamente!\n\n${dateStr} a las ${selectedTime}\n\nTe contactaremos por correo y WhatsApp para confirmar.`);
+            }
+            bookingForm.reset();
+            selectedDate = null;
+            selectedTime = null;
+            renderCalendar();
+            renderTimeSlots();
+            updateSummary();
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

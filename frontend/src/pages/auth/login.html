@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso al Sistema | Honatu Insumos Hidropónicos</title>
+  <meta name="description" content="Inicia sesión en Honatu para acceder a tu panel de cliente o administración.">
+
+  <!-- Google Fonts: Besley (Display/Heading) & Plus Jakarta Sans (Body/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Besley:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Shared stylesheets -->
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/pages/subpage.css">
+  <link rel="stylesheet" href="../../css/components/forms.css">
+  <link rel="stylesheet" href="../../css/pages/ecommerce.css">
+  <link rel="icon" href="../../assets/logo/Logo.png" type="image/png">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at 50% 25%, rgba(94, 130, 84, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 10% 90%, rgba(184, 107, 74, 0.08) 0%, transparent 45%),
+        linear-gradient(180deg, #F5F7F3 0%, var(--color-blanco-vegetal, #FAFBF8) 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+      color: var(--color-gray-800, #2C352E);
+      overflow-x: hidden;
+    }
+
+    .auth-viewport {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl, 32px) var(--space-md, 16px);
+      box-sizing: border-box;
+    }
+
+    .auth-page-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--color-white, #FFFFFF);
+      border-radius: var(--radius-xl, 22px);
+      border: 1px solid rgba(35, 78, 40, 0.12);
+      box-shadow: 0 25px 60px -15px rgba(28, 40, 25, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+      padding: 38px 36px 32px;
+      position: relative;
+      overflow: visible;
+      animation: authCardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      box-sizing: border-box;
+    }
+
+    @keyframes authCardEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(22px) scale(0.98);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+
+    /* ============================================
+       Card Typography & Form Elements (Clean, No Emojis)
+       ============================================ */
+    .auth-page-header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .auth-page-logo {
+      width: 72px;
+      height: auto;
+      margin: 0 auto 12px;
+      display: block;
+      filter: drop-shadow(0 4px 12px rgba(35, 78, 40, 0.16));
+      cursor: pointer;
+      transition: transform 0.25s ease;
+      user-select: none;
+    }
+
+    .auth-page-logo:hover {
+      transform: scale(1.06);
+    }
+
+    .auth-page-title {
+      font-family: var(--font-display, 'Outfit', serif);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--color-forest, #234E28);
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .auth-page-subtitle {
+      font-size: 0.9rem;
+      color: var(--color-gray-500, #5A695C);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    /* Clean Test Access Box */
+    .test-box {
+      background: rgba(35, 78, 40, 0.04);
+      border: 1px dashed rgba(94, 130, 84, 0.4);
+      border-radius: var(--radius-md, 12px);
+      padding: 14px 16px;
+      margin-bottom: 22px;
+    }
+
+    .test-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .test-box-title {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--color-forest, #234E28);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .test-box-badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--color-sage, #5E8254);
+      background: rgba(94, 130, 84, 0.12);
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .test-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-test-quick {
+      padding: 9px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm, 8px);
+      border: 1px solid var(--color-gray-200, #DDE3DA);
+      background: var(--color-white, #FFFFFF);
+      color: var(--color-forest, #234E28);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .btn-test-quick svg {
+      flex-shrink: 0;
+    }
+
+    .btn-test-quick:hover {
+      background: var(--color-forest, #234E28);
+      color: #FFFFFF;
+      border-color: var(--color-forest, #234E28);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(35, 78, 40, 0.15);
+    }
+
+    .btn-test-admin {
+      background: var(--color-earth, #1C130D);
+      color: #FFFFFF;
+      border-color: var(--color-earth, #1C130D);
+    }
+
+    .btn-test-admin:hover {
+      background: #2E2016;
+      border-color: #2E2016;
+      box-shadow: 0 4px 8px rgba(28, 19, 13, 0.2);
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-gray-700, #364238);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      font-size: 0.9rem;
+      border: 1px solid var(--color-gray-300, #D0D8CD);
+      border-radius: var(--radius-sm, 8px);
+      background: #FAFCF9;
+      color: var(--color-gray-900, #1A211C);
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-forest, #234E28);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(35, 78, 40, 0.12);
+    }
+
+    .btn-submit-main {
+      width: 100%;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm, 8px);
+      border: none;
+      background: var(--color-forest, #234E28);
+      color: #FFFFFF;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+      box-shadow: 0 4px 12px rgba(35, 78, 40, 0.2);
+    }
+
+    .btn-submit-main:hover {
+      background: #1B3F20;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(35, 78, 40, 0.25);
+    }
+
+    .form-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: var(--color-gray-400, #8A998C);
+      font-size: 0.78rem;
+      margin: 20px 0;
+      text-transform: lowercase;
+    }
+
+    .form-divider::before,
+    .form-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--color-gray-200, #E2E7DE);
+    }
+
+    .form-divider:not(:empty)::before {
+      margin-right: 0.6em;
+    }
+
+    .form-divider:not(:empty)::after {
+      margin-left: 0.6em;
+    }
+
+    .btn-return-store {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 0.86rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm, 8px);
+      border: 1px solid var(--color-gray-300, #CCD5C8);
+      background: transparent;
+      color: var(--color-gray-700, #4A584C);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .btn-return-store:hover {
+      background: #F0F4EE;
+      color: var(--color-forest, #234E28);
+      border-color: var(--color-forest, #234E28);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="auth-viewport">
+    <div class="auth-page-card" id="authCard" data-vines="true">
+
+      <!-- ============================================
+           CARD CONTENT
+           ============================================ -->
+      <div class="auth-page-header">
+        <img src="../../assets/logo/Logo.png" alt="Honatu Hidroponía" class="auth-page-logo" id="honatuLogo"
+          title="Honatu Hidroponía">
+        <h1 class="auth-page-title">Iniciar Sesión</h1>
+        <p class="auth-page-subtitle">Accede a tus pedidos, cursos o al panel de control administrativo.</p>
+      </div>
+
+      <!-- Quick Test Login Actions (Clean without Emojis) -->
+      <div class="test-box">
+        <div class="test-box-header">
+          <span class="test-box-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            Accesos Rápidos de Prueba
+          </span>
+          <span class="test-box-badge">Test Mode</span>
+        </div>
+        <div class="test-actions-grid">
+          <button type="button" class="btn-test-quick" id="quickClientBtn" title="Ingresar como Cliente">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Rol Cliente
+          </button>
+          <button type="button" class="btn-test-quick btn-test-admin" id="quickAdminBtn"
+            title="Ingresar como Administrador">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Rol Admin
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Login Form -->
+      <form id="standaloneLoginForm">
+        <div class="form-group">
+          <label class="form-label" for="loginUser">Usuario o Correo Electrónico</label>
+          <input type="text" id="loginUser" class="form-input" placeholder="Vacío = Cliente | admin = Administrador"
+            autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPass">Contraseña</label>
+          <input type="password" id="loginPass" class="form-input" placeholder="Vacío = Cliente | contraseña = Admin"
+            autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-submit-main">
+          <span>Ingresar al Sistema</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </form>
+
+      <div class="form-divider">o también puedes</div>
+
+      <div>
+        <a href="../../index.html" class="btn-return-store">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Volver a la Tienda Principal
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Login Logic Script -->
+  <script type="module">
+    import { loginAsClient, loginAsAdmin, getClientHomeUrl } from '../../js/controllers/auth.controller.js';
+    import { showToast } from '../../js/middleware/toast.middleware.js';
+    import { setString, setItem, StorageKeys } from '../../js/middleware/storage.middleware.js';
+    import { createVineDecoration, initVineDecorations } from '../../js/components/vine-decoration.js';
+
+    const authCard = document.getElementById('authCard');
+
+    // Inject shared vine decorations from component
+    if (authCard && !authCard.querySelector('.form-vine-wrapper')) {
+      authCard.style.position = 'relative';
+      authCard.appendChild(createVineDecoration());
+      requestAnimationFrame(() => {
+        authCard.classList.add('vines-grown');
+      });
+    }
+
+    // Quick Test Actions
+    document.getElementById('quickClientBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginAsClient();
+    });
+
+    document.getElementById('quickAdminBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginAsAdmin();
+    });
+
+    // Form Submission
+    document.getElementById('standaloneLoginForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const rawUser = (document.getElementById('loginUser')?.value || '').trim();
+      const rawPass = (document.getElementById('loginPass')?.value || '').trim();
+
+      const userNormalized = rawUser.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const passNormalized = rawPass.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      // 1. If user typed "admin" or password indicates admin credentials -> Admin Panel
+      const isAdminUser = userNormalized === 'admin' || userNormalized === 'admin@honatu.com' || userNormalized.startsWith('admin');
+      const isAdminPass = passNormalized === 'admin' || passNormalized === 'contrasena' || passNormalized.startsWith('contra') || passNormalized === 'password';
+
+      if (isAdminUser || isAdminPass) {
+        loginAsAdmin();
+        return;
+      }
+
+      // 2. If both fields are empty -> Quick Client Login (as requested)
+      if (!rawUser && !rawPass) {
+        loginAsClient();
+        return;
+      }
+
+      // 3. Regular custom user login -> Client Mode
+      const authUser = {
+        name: rawUser.includes('@') ? rawUser.split('@')[0] : rawUser,
+        email: rawUser.includes('@') ? rawUser : `${rawUser}@honatu.com`,
+        role: 'CLIENT'
+      };
+      setString(StorageKeys.AUTH, 'true');
+      setString(StorageKeys.AUTH_ROLE, 'CLIENT');
+      setItem(StorageKeys.AUTH_USER, authUser);
+      showToast("Bienvenido(a). Sesión iniciada con éxito.");
+      setTimeout(() => {
+        window.location.href = getClientHomeUrl();
+      }, 400);
+    });
+  </script>
+</body>
+
+</html>
