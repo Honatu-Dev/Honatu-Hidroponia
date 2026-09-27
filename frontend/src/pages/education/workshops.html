@@ -451,47 +451,7 @@
     </div>
   </aside>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const overlay = document.getElementById('workshopOverlay');
-      const modal = document.getElementById('workshopModal');
-      const closeBtn = document.getElementById('workshopClose');
-      const selectedName = document.getElementById('workshopSelectedName');
-      const form = document.getElementById('workshopForm');
-
-      document.querySelectorAll('.btn-register-workshop').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const wsTitle = e.target.getAttribute('data-workshop') || 'Taller Honatu';
-          selectedName.textContent = wsTitle;
-          overlay.classList.add('active');
-          modal.classList.add('active');
-          modal.setAttribute('aria-hidden', 'false');
-        });
-      });
-
-      const closeModal = () => {
-        overlay.classList.remove('active');
-        modal.classList.remove('active');
-        modal.setAttribute('aria-hidden', 'true');
-      };
-
-      if (closeBtn) closeBtn.addEventListener('click', closeModal);
-      if (overlay) overlay.addEventListener('click', closeModal);
-
-      if (form) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          closeModal();
-          if (window.showToast) {
-            window.showToast(`¡Registro exitoso para ${selectedName.textContent}! Te contactaremos pronto`);
-          } else {
-            alert(`¡Registro exitoso para ${selectedName.textContent}!`);
-          }
-          form.reset();
-        });
-      }
-    });
-  </script>
+  <!-- El script ha sido movido a src/js/controllers/workshops.controller.js -->
 
 </body>
 

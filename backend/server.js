@@ -5,6 +5,7 @@ import connectDB from './src/config/db.js';
 
 // Rutas
 import authRoutes from './src/routes/auth.routes.js';
+import workshopsRoutes from './src/routes/workshops.routes.js';
 // import productRoutes from './src/routes/product.routes.js';
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(express.json());
 
 // Middlewares de rutas
 app.use('/api/auth', authRoutes);
+app.use('/api/workshops', workshopsRoutes);
 // app.use('/api/productos', productRoutes);
 
 // Ruta básica de salud
