@@ -20,7 +20,6 @@ export default defineConfig({
         acciones: resolve(__dirname, 'src/pages/about/actions.html'),
         involucrate: resolve(__dirname, 'src/pages/about/get-involved.html'),
         producto: resolve(__dirname, 'src/pages/shop/product.html'),
-        favoritos: resolve(__dirname, 'src/pages/shop/favorites.html'),
         carrito: resolve(__dirname, 'src/pages/shop/cart.html'),
         checkout: resolve(__dirname, 'src/pages/shop/checkout.html'),
         gracias: resolve(__dirname, 'src/pages/shop/thanks.html'),

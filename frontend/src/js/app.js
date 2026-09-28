@@ -16,10 +16,11 @@ import { initNavbar } from './controllers/navbar.controller.js';
 import { initSmoothScroll, initActiveNavTracking, handleInitialHashScroll } from './controllers/scroll.controller.js';
 import { initAuth } from './controllers/auth.controller.js';
 import { initCart } from './controllers/cart.controller.js';
-import { initFavorites } from './controllers/favorites.controller.js';
 import { initFilters } from './controllers/filters.controller.js';
 import { initContactForm } from './controllers/contact.controller.js';
 import { initFooter } from './controllers/footer.controller.js';
+import { initWorkshops } from './controllers/workshops.controller.js';
+import { initShopGrid } from './controllers/shop.controller.js';
 
 // --- UI Components ---
 import './components/header.component.js'; // Registers <honatu-header> Custom Element
@@ -47,9 +48,10 @@ function bootstrapApp() {
   try { handleInitialHashScroll(); } catch (e) { console.warn('Hash scroll error:', e); }
   try { initAuth(); } catch (e) { console.warn('Auth init error:', e); }
   try { initCart(); } catch (e) { console.warn('Cart init error:', e); }
-  try { initFavorites(); } catch (e) { console.warn('Favorites init error:', e); }
   try { initFilters(); } catch (e) { console.warn('Filters init error:', e); }
   try { initContactForm(); } catch (e) { console.warn('Contact form error:', e); }
+  try { initWorkshops(); } catch (e) { console.warn('Workshops init error:', e); }
+  try { initShopGrid(); } catch (e) { console.warn('Shop init error:', e); }
   
   // UI Components
   try { initVineDecorations(); } catch (e) { console.warn('Vine decorations error:', e); }

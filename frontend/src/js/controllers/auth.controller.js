@@ -29,24 +29,22 @@ export function isAdmin() {
   return getIsAuthenticated() && getAuthRole() === 'ADMIN';
 }
 
+import { resolveRelativePath } from '../components/footer.component.js';
+
 export function getAdminUrl() {
-  const isSubpage = window.location.pathname.includes('/pages/');
-  return isSubpage ? '../admin/admin.html' : './pages/admin/admin.html';
+  return resolveRelativePath('pages/admin/admin.html');
 }
 
 export function getLoginUrl() {
-  const isSubpage = window.location.pathname.includes('/pages/');
-  return isSubpage ? '../auth/login.html' : './pages/auth/login.html';
+  return resolveRelativePath('pages/auth/login.html');
 }
 
 export function getClientHomeUrl() {
-  const isSubpage = window.location.pathname.includes('/pages/');
-  return isSubpage ? '../../index.html' : './index.html';
+  return resolveRelativePath('index.html');
 }
 
 export function getClientAccountUrl() {
-  const isSubpage = window.location.pathname.includes('/pages/');
-  return isSubpage ? '../auth/account.html' : './pages/auth/account.html';
+  return resolveRelativePath('pages/auth/account.html');
 }
 
 export function logout(customRedirect = null) {
@@ -83,7 +81,7 @@ export function requireAdminAuth(redirectToLogin = true) {
   return false;
 }
 
-const AUTH_VINE_DECORATION = `
+export const AUTH_VINE_DECORATION = `
 <svg style="width:0; height:0; position:absolute;">
   <defs>
     <linearGradient id="leafGradAuth" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -300,50 +298,73 @@ function bindModalEvents() {
   switchToRegister?.addEventListener('click', () => switchAuthTab('register'));
   switchToLogin?.addEventListener('click', () => switchAuthTab('login'));
 
-  modalLoginForm?.addEventListener('submit', (e) => {
+  modalLoginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const userVal = (document.getElementById('modalLoginEmail')?.value || '').trim();
     const passVal = (document.getElementById('modalLoginPassword')?.value || '').trim();
 
-    // Dual Test Login Logic (Admin disabled for now)
-    if (!userVal && !passVal) {
-      handleAuthSuccess({
-        role: 'CLIENT',
-        name: 'Cultivador Honatu',
-        email: 'cliente@honatu.com',
-        message: "¡Bienvenido! Sesión iniciada como Cliente."
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userVal, password: passVal })
       });
-    } /* else if (
-      (userVal.toLowerCase() === 'admin' || userVal.toLowerCase() === 'admin@honatu.com') &&
-      (passVal === 'contraseña' || passVal === 'admin' || passVal === 'contrasena')
-    ) {
-      handleAuthSuccess({
-        role: 'ADMIN',
-        name: 'Administrador Honatu',
-        email: 'admin@honatu.com',
-        message: "¡Acceso Autorizado! Bienvenido al Panel de Administrador.",
-        redirectUrl: getAdminUrl()
-      });
-    } */ else {
-      handleAuthSuccess({
-        role: 'CLIENT',
-        name: userVal.includes('@') ? userVal.split('@')[0] : userVal,
-        email: userVal.includes('@') ? userVal : `${userVal}@honatu.com`,
-        message: `¡Bienvenido(a) de nuevo! Sesión iniciada.`
-      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save the token for future API calls
+        localStorage.setItem('honatu_token', data.token);
+        
+        handleAuthSuccess({
+          role: data.user.role,
+          name: data.user.name,
+          email: data.user.email,
+          message: `¡Bienvenido(a) de nuevo! Sesión iniciada.`
+        });
+      } else {
+        if (window.showToast) window.showToast(data.message || 'Credenciales incorrectas', 'error');
+        else alert(data.message || 'Credenciales incorrectas');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      if (window.showToast) window.showToast('Error de conexión con el servidor', 'error');
     }
   });
 
-  modalRegisterForm?.addEventListener('submit', (e) => {
+  modalRegisterForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('modalRegName')?.value || 'Cultivador';
-    const email = document.getElementById('modalRegEmail')?.value || 'cliente@honatu.com';
-    handleAuthSuccess({
-      role: 'CLIENT',
-      name: name,
-      email: email,
-      message: `¡Bienvenido(a), ${name}! Tu cuenta ha sido creada.`
-    });
+    const email = document.getElementById('modalRegEmail')?.value || '';
+    const password = document.getElementById('modalRegPassword')?.value || '';
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName: name, email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Automatically log them in after registration
+        localStorage.setItem('honatu_token', data.token);
+        
+        handleAuthSuccess({
+          role: data.user.role,
+          name: data.user.name,
+          email: data.user.email,
+          message: `¡Bienvenido(a), ${data.user.name}! Tu cuenta ha sido creada.`
+        });
+      } else {
+        if (window.showToast) window.showToast(data.message || 'Error al crear cuenta', 'error');
+        else alert(data.message || 'Error al crear cuenta');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      if (window.showToast) window.showToast('Error de conexión con el servidor', 'error');
+    }
   });
 }
 

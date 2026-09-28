@@ -315,24 +315,34 @@
       <div class="auth-page-header">
         <img src="../../assets/logo/Logo.png" alt="Honatu Hidroponía" class="auth-page-logo" id="honatuLogo"
           title="Honatu Hidroponía">
-        <h1 class="auth-page-title">Iniciar Sesión</h1>
-        <p class="auth-page-subtitle">Accede a tus pedidos y perfil personal.</p>
+        <h1 class="auth-page-title">Crear Cuenta</h1>
+        <p class="auth-page-subtitle">Únete a la comunidad de cultivadores Honatu.</p>
       </div>
 
-      <!-- Main Login Form -->
-      <form id="standaloneLoginForm">
+      <!-- Main Register Form -->
+      <form id="registerForm">
         <div class="form-group">
-          <label class="form-label" for="loginUser">Correo Electrónico</label>
-          <input type="email" id="loginUser" class="form-input" placeholder="tu@correo.com" required>
+          <label class="form-label" for="regName">Nombre Completo</label>
+          <input type="text" id="regName" class="form-input" placeholder="Ej. Carlos Mendoza" required>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="loginPass">Contraseña</label>
-          <input type="password" id="loginPass" class="form-input" placeholder="Tu contraseña secreta" required>
+          <label class="form-label" for="regPhone">Teléfono / WhatsApp</label>
+          <input type="tel" id="regPhone" class="form-input" placeholder="+52 442 000 0000">
         </div>
 
-        <button type="submit" class="btn-submit-main" id="btnLogin">
-          <span>Ingresar al Sistema</span>
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Correo Electrónico</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="carlos@ejemplo.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPass">Contraseña</label>
+          <input type="password" id="regPass" class="form-input" placeholder="Mínimo 6 caracteres" required>
+        </div>
+
+        <button type="submit" class="btn-submit-main" id="btnRegister">
+          <span>Registrarme y Entrar</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -341,59 +351,60 @@
         </button>
       </form>
 
-      <div class="form-divider">o si eres nuevo</div>
+      <div class="form-divider">o también puedes</div>
 
       <div>
-        <a href="register.html" class="btn-return-store" style="border-color: var(--color-forest); color: var(--color-forest);">
-          Crear una cuenta nueva
+        <a href="login.html" class="btn-return-store">
+          Ya tengo cuenta. Iniciar Sesión
         </a>
       </div>
 
     </div>
   </main>
 
-  <!-- Login Logic Script -->
   <script type="module">
     import { setString, setItem, StorageKeys } from '../../js/middleware/storage.middleware.js';
 
-    document.getElementById('standaloneLoginForm')?.addEventListener('submit', async (e) => {
+    document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const btn = document.getElementById('btnLogin');
+      const btn = document.getElementById('btnRegister');
       const originalText = btn.innerHTML;
-      btn.innerHTML = 'Verificando...';
+      btn.innerHTML = 'Procesando...';
       btn.disabled = true;
 
-      const email = document.getElementById('loginUser').value.trim();
-      const password = document.getElementById('loginPass').value.trim();
+      const fullName = document.getElementById('regName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPass').value.trim();
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
+        const response = await fetch('http://localhost:5000/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ fullName, phone, email, password })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          alert(data.message || 'Error al iniciar sesión');
+          alert(data.message || 'Error al registrar');
           btn.innerHTML = originalText;
           btn.disabled = false;
           return;
         }
 
-        // Éxito
+        // Si es exitoso, guardar Token y User Info
         setString(StorageKeys.AUTH, 'true');
-        setString('honatu_token', data.token);
+        setString('honatu_token', data.token); // Custom token key
         setString(StorageKeys.AUTH_ROLE, data.user.role);
         setItem(StorageKeys.AUTH_USER, data.user);
         
+        alert("¡Cuenta creada exitosamente!");
         window.location.href = 'account.html';
 
       } catch (error) {
         console.error("Error connecting to backend:", error);
-        alert('Error de conexión con el servidor.');
+        alert('Error de conexión con el servidor. ¿Está encendido el backend?');
         btn.innerHTML = originalText;
         btn.disabled = false;
       }

@@ -40,12 +40,12 @@ export const FOOTER_CONFIG = {
   ],
   navigation: [
     { label: 'Inicio', path: 'index.html' },
-    { label: 'Nosotros', path: 'pages/nosotros.html' },
-    { label: 'Tienda', path: 'pages/tienda.html' },
-    { label: 'Educación', path: 'pages/educacion.html' },
-    { label: 'Talleres', path: 'pages/talleres.html' },
-    { label: 'Servicios', path: 'pages/servicios.html' },
-    { label: 'Involúcrate', path: 'pages/involucrate.html' }
+    { label: 'Nosotros', path: 'pages/about/about.html' },
+    { label: 'Tienda', path: 'pages/shop/shop.html' },
+    { label: 'Educación', path: 'pages/education/education.html' },
+    { label: 'Talleres', path: 'pages/education/workshops.html' },
+    { label: 'Servicios', path: 'pages/services/services.html' },
+    { label: 'Involúcrate', path: 'pages/about/get-involved.html' }
   ],
   contact: {
     phone: '+52 (442) 459-1473',
@@ -79,32 +79,19 @@ export function isSubpageView() {
 }
 
 /**
- * Resolves a root-relative path (e.g. 'pages/tienda.html' or 'assets/logo/Logo.png')
- * to the correct relative URL based on the current page location.
+ * Resolves a root-relative path (e.g. 'pages/shop/shop.html' or 'assets/logo/Logo.png')
+ * to the correct absolute URL using Vite's BASE_URL so paths never accumulate.
  */
 export function resolveRelativePath(targetPath) {
-  const isSubpage = isSubpageView();
-
-  if (targetPath.startsWith('http://') || targetPath.startsWith('https://') || targetPath.startsWith('mailto:') || targetPath.startsWith('tel:')) {
+  if (!targetPath) return '';
+  if (targetPath.startsWith('http://') || targetPath.startsWith('https://') || targetPath.startsWith('mailto:') || targetPath.startsWith('tel:') || targetPath.startsWith('#')) {
     return targetPath;
   }
 
-  if (targetPath === 'index.html') {
-    return isSubpage ? '../index.html' : './index.html';
-  }
-
-  if (targetPath.startsWith('pages/')) {
-    const pageFileName = targetPath.replace('pages/', '');
-    return isSubpage ? `./${pageFileName}` : `./pages/${pageFileName}`;
-  }
-
-  const cleanPath = targetPath.replace(/^(\.\/|\.\.\/)?src\//, '');
-
-  if (cleanPath.startsWith('assets/')) {
-    return isSubpage ? `../${cleanPath}` : `./${cleanPath}`;
-  }
-
-  return isSubpage ? `../${cleanPath}` : `./${cleanPath}`;
+  const base = import.meta.env.BASE_URL || '/';
+  const cleanBase = base.endsWith('/') ? base : base + '/';
+  const cleanTarget = targetPath.replace(/^\.?\//, '');
+  return `${cleanBase}${cleanTarget}`;
 }
 
 /**
