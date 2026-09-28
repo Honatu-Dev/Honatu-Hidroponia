@@ -234,91 +234,9 @@
             sistemas hidropónicos.</p>
         </div>
 
-        <div class="workshop-grid">
-          <!-- TALLER 1: Huertos Hidropónicos en casa (Nivel I) -->
-          <article class="workshop-card">
-            <div class="workshop-img">
-              <img src="https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_600,h_400/v1790200240/93944eb5-9e85-483d-915f-c5df23c46494.jpg" alt="Huertos Hidropónicos en casa Nivel I" loading="lazy">
-              <span class="workshop-badge">Presencial</span>
-            </div>
-            <div class="workshop-body">
-              <div class="workshop-date">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                Lunes 5 y Martes 6 de Octubre · 5:00 PM
-              </div>
-              <h3 class="workshop-title">Huertos Hidropónicos en casa (Nivel I)</h3>
-              <p class="workshop-desc">Ideal para principiantes. Duración: 5 hrs – Lunes 3 hrs y Martes 2 hrs.</p>
-              <ul class="workshop-agenda">
-                <li>Tipos de sistemas hidropónicos</li>
-                <li>Bases generales de los sistemas</li>
-                <li>Principios de fisiología</li>
-                <li>Diseño de sistemas</li>
-              </ul>
-              <button class="btn btn-terracotta btn-register-workshop" data-workshop="Huertos Hidropónicos en casa (Nivel I)"
-                style="width: 100%; justify-content: center;">Reservar Lugar</button>
-            </div>
-          </article>
-
-          <!-- TALLER 2: Hidroponia General (Nivel II) -->
-          <article class="workshop-card">
-            <div class="workshop-img">
-              <img src="https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_600,h_400/v1790200248/2098e3d5-05f3-4011-89cf-1892a4b13859.jpg" alt="Hidroponia General Nivel II" loading="lazy">
-              <span class="workshop-badge">Presencial</span>
-            </div>
-            <div class="workshop-body">
-              <div class="workshop-date">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                Sábado 10 de Octubre · 9:00 AM
-              </div>
-              <h3 class="workshop-title">Hidroponia General (Nivel II)</h3>
-              <p class="workshop-desc">Taller pesado para personas con conocimientos básicos que buscan profundizar en el manejo técnico de sistemas. Duración: 4 hrs.</p>
-              <ul class="workshop-agenda">
-                <li>Química de la solución nutritiva</li>
-                <li>Bases de la nutrición vegetal</li>
-                <li>Sistemas hidropónicos (NFT, DWC, aeroponía, sustrato)</li>
-              </ul>
-              <button class="btn btn-terracotta btn-register-workshop" data-workshop="Hidroponia General (Nivel II)"
-                style="width: 100%; justify-content: center;">Reservar Lugar</button>
-            </div>
-          </article>
-
-          <!-- MASTERCLASS: De la duda a la cosecha -->
-          <article class="workshop-card">
-            <div class="workshop-img">
-              <img src="https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_600,h_400/v1790200238/dd650d18-8b3d-4818-aa36-7152e31bdc6a.jpg" alt="Masterclass: De la duda a la cosecha" loading="lazy">
-              <span class="workshop-badge workshop-badge--online">Online</span>
-            </div>
-            <div class="workshop-body">
-              <div class="workshop-date">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                En línea · Duración: 1 hr
-              </div>
-              <h3 class="workshop-title">De la duda a la cosecha: Hablemos de hidroponía</h3>
-              <p class="workshop-desc">Masterclass virtual enfocada a personas sin experiencia previa en hidroponía: curiosos y aficionados a las plantas. Para quienes ya intentaron cultivar en tierra sin buenos resultados.</p>
-              <ul class="workshop-agenda">
-                <li>Introducción a la hidroponía desde cero</li>
-                <li>Ventajas frente al cultivo en tierra</li>
-                <li>Primeros pasos para tu huerto hidropónico</li>
-              </ul>
-              <button class="btn btn-terracotta btn-register-workshop" data-workshop="De la duda a la cosecha: Hablemos de hidroponía"
-                style="width: 100%; justify-content: center;">Reservar Lugar</button>
-            </div>
-          </article>
+        <div class="workshop-grid" id="workshopGrid">
+          <!-- Las tarjetas de talleres se renderizan dinámicamente desde la base de datos aquí -->
+          <p style="grid-column: 1 / -1; text-align: center; color: var(--color-gray-500);">Cargando talleres disponibles...</p>
         </div>
       </div>
     </section>
@@ -333,39 +251,8 @@
           </p>
         </div>
 
-        <div class="past-gallery">
-          <div class="past-card">
-            <img src="https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_600,h_400/Talleres.PNG"
-              data-cloudinary="Talleres.PNG" alt="Taller de Verano 2024" loading="lazy">
-            <div class="past-card-body">
-              <div class="past-card-title">Taller Práctico de Verano 2024</div>
-              <div class="past-card-meta">Julio 2024 · 42 Asistentes · Presencial</div>
-              <p style="font-size: 0.88rem; color: var(--color-gray-600); line-height: 1.5;">Sesión intensiva en vivero
-                sobre sistemas DWC y germinación en foami agrícola.</p>
-            </div>
-          </div>
-
-          <div class="past-card">
-            <img src="https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_600,h_400/IMG_7833"
-              data-cloudinary="IMG_7833" alt="Workshop de Automatización" loading="lazy">
-            <div class="past-card-body">
-              <div class="past-card-title">Workshop de Sensores y Automatización</div>
-              <div class="past-card-meta">Mayo 2024 · 28 Asistentes · Híbrido</div>
-              <p style="font-size: 0.88rem; color: var(--color-gray-600); line-height: 1.5;">Integración de
-                temporizadores digitales, automatización de riego y bombas de recirculación.</p>
-            </div>
-          </div>
-
-          <div class="past-card">
-            <img src="https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_600,h_400/Kale"
-              data-cloudinary="Kale" alt="Seminario Agricultura Sostenible" loading="lazy">
-            <div class="past-card-body">
-              <div class="past-card-title">Seminario Agricultura Sostenible</div>
-              <div class="past-card-meta">Febrero 2024 · 65 Asistentes · Virtual</div>
-              <p style="font-size: 0.88rem; color: var(--color-gray-600); line-height: 1.5;">Encuentro comunitario
-                enfocado en ahorro hídrico y cero uso de plaguicidas tóxicos.</p>
-            </div>
-          </div>
+        <div class="past-gallery" id="pastWorkshopGrid">
+          <p style="grid-column: 1 / -1; text-align: center; color: var(--color-gray-500); padding: 40px 0;">Cargando talleres anteriores...</p>
         </div>
       </div>
     </section>
@@ -378,7 +265,7 @@
   <!-- MODAL DE INSCRIPCIÓN A TALLER -->
   <div id="workshopOverlay" class="login-overlay"></div>
   <div id="workshopModal" class="login-modal" aria-hidden="true" role="dialog">
-    <div class="login-modal-content" data-vines="true" style="overflow: visible; position: relative; z-index: 1;">
+    <div class="login-modal-card" id="workshopModalCard">
       <button id="workshopClose" class="login-close" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24"
           fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18" />

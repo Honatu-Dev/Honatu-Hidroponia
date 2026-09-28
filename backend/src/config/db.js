@@ -23,7 +23,7 @@ const connectDB = async () => {
     await import('../models/index.js');
 
     // Auto-sync models (sincroniza las tablas con PostgreSQL automáticamente)
-    await sequelize.sync({ alter: true });
+    // await sequelize.sync({ alter: true }); // Deshabilitado porque causa error con ENUM de Users
   } catch (error) {
     console.error('Unable to connect to the database:', error);
     process.exit(1);

@@ -14,14 +14,14 @@ export const HEADER_CONFIG = {
     // homeHref is resolved at render time depending on context
   },
   navigation: [
-    { label: 'Servicios', path: 'pages/servicios.html', homeHash: '#servicios' },
-    { label: 'Quienes somos?', path: 'pages/nosotros.html', homeHash: '#nosotros' },
-    { label: 'Tienda', path: 'pages/tienda.html', homeHash: '#tienda' },
-    { label: 'Blog', path: 'pages/educacion.html', homeHash: '#educacion' }
+    { label: 'Servicios', path: 'pages/services/services.html', homeHash: '#servicios' },
+    { label: 'Quienes somos?', path: 'pages/about/about.html', homeHash: '#nosotros' },
+    { label: 'Tienda', path: 'pages/shop/shop.html', homeHash: '#tienda' },
+    { label: 'Blog', path: 'pages/education/education.html', homeHash: '#educacion' }
   ],
   cta: {
     label: 'Contactanos',
-    path: 'pages/involucrate.html#contacto',
+    path: 'pages/about/get-involved.html#contacto',
     homeHash: '#involucrate'
   }
 };

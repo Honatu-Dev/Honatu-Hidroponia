@@ -20,6 +20,7 @@ import { initFilters } from './controllers/filters.controller.js';
 import { initContactForm } from './controllers/contact.controller.js';
 import { initFooter } from './controllers/footer.controller.js';
 import { initWorkshops } from './controllers/workshops.controller.js';
+import { initShopGrid } from './controllers/shop.controller.js';
 
 // --- UI Components ---
 import './components/header.component.js'; // Registers <honatu-header> Custom Element
@@ -50,6 +51,7 @@ function bootstrapApp() {
   try { initFilters(); } catch (e) { console.warn('Filters init error:', e); }
   try { initContactForm(); } catch (e) { console.warn('Contact form error:', e); }
   try { initWorkshops(); } catch (e) { console.warn('Workshops init error:', e); }
+  try { initShopGrid(); } catch (e) { console.warn('Shop init error:', e); }
   
   // UI Components
   try { initVineDecorations(); } catch (e) { console.warn('Vine decorations error:', e); }
