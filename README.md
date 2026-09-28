@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="src/assets/logo/Logo.png" alt="Honatu Logo" width="120px">
+  <img src="frontend/src/assets/logo/Logo.png" alt="Honatu Logo" width="120px">
 
 ### Bringing hydroponic production to your home
 
