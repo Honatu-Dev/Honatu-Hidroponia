@@ -13,7 +13,7 @@ const swaggerDefinition = {
     version: '1.0.0',
     description: `API Backend para la plataforma de Honatu Hidroponía.
     
-Incluye endpoints para autenticación de usuarios y clientes, gestión e inscripciones de talleres educativos, y control de acceso basado en roles (JWT).`,
+Incluye endpoints para autenticación de usuarios y clientes, gestión de perfiles, inscripciones a talleres educativos y control de acceso basado en roles (JWT).`,
     contact: {
       name: 'Equipo de Desarrollo Honatu',
       url: 'https://honatu.com',
@@ -113,11 +113,88 @@ Incluye endpoints para autenticación de usuarios y clientes, gestión e inscrip
                 enum: ['CLIENT', 'ADMIN'],
                 example: 'CLIENT',
               },
+              name: {
+                type: 'string',
+                example: 'María González Pérez',
+              },
               fullName: {
                 type: 'string',
                 example: 'María González Pérez',
               },
             },
+          },
+        },
+      },
+      UserProfile: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            format: 'uuid',
+            example: '550e8400-e29b-41d4-a716-446655440000',
+          },
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'cliente@ejemplo.com',
+          },
+          role: {
+            type: 'string',
+            enum: ['CLIENT', 'ADMIN'],
+            example: 'CLIENT',
+          },
+          name: {
+            type: 'string',
+            example: 'María González Pérez',
+          },
+          fullName: {
+            type: 'string',
+            example: 'María González Pérez',
+          },
+          phone: {
+            type: 'string',
+            example: '+52 55 1234 5678',
+          },
+          shippingAddress: {
+            type: 'string',
+            example: 'Av. Universidad 120, Col. Centro, Querétaro',
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+          },
+        },
+      },
+      UpdateProfileRequest: {
+        type: 'object',
+        properties: {
+          fullName: {
+            type: 'string',
+            example: 'María González Pérez',
+          },
+          phone: {
+            type: 'string',
+            example: '+52 442 123 4567',
+          },
+          shippingAddress: {
+            type: 'string',
+            example: 'Av. Universidad 120, Col. Centro, Querétaro, Qro. CP 76000',
+          },
+        },
+      },
+      ChangePasswordRequest: {
+        type: 'object',
+        required: ['currentPassword', 'newPassword'],
+        properties: {
+          currentPassword: {
+            type: 'string',
+            format: 'password',
+            example: 'Password123!',
+          },
+          newPassword: {
+            type: 'string',
+            format: 'password',
+            example: 'NewSecurePassword456!',
           },
         },
       },
@@ -256,7 +333,7 @@ Incluye endpoints para autenticación de usuarios y clientes, gestión e inscrip
   tags: [
     {
       name: 'Auth',
-      description: 'Operaciones de registro e inicio de sesión de usuarios',
+      description: 'Operaciones de registro, inicio de sesión y gestión de perfiles de usuario',
     },
     {
       name: 'Workshops',

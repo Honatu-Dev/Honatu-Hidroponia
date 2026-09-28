@@ -125,6 +125,71 @@ Authenticates an existing user and returns a signed JWT valid for 30 days.
     ```
   - `401 Unauthorized`: Invalid credentials.
 
+#### `GET /api/auth/me`
+Retrieves currently authenticated user information and associated client/admin profiles.
+
+- **Access**: Authenticated (`requireAuth`)
+- **Headers**: `Authorization: Bearer <token>`
+- **Response `200 OK`**:
+```json
+{
+  "user": {
+    "id": "7fa84d12-bf9e-4e31-893c-fa58913d9641",
+    "email": "user@example.com",
+    "role": "CLIENT",
+    "fullName": "Maria Gonzalez",
+    "phone": "+52 55 1234 5678",
+    "shippingAddress": "Av. Universidad 120, Queretaro",
+    "createdAt": "2026-09-20T10:00:00.000Z"
+  }
+}
+```
+- **Response `401 Unauthorized`**: Token missing, malformed, or expired.
+
+#### `PUT /api/auth/profile`
+Updates contact information and shipping preferences for the active user.
+
+- **Access**: Authenticated (`requireAuth`)
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**:
+```json
+{
+  "fullName": "Maria Gonzalez Perez",
+  "phone": "+52 442 987 6543",
+  "shippingAddress": "Av. Universidad 120, Col. Centro, Queretaro, Qro. CP 76000"
+}
+```
+- **Response `200 OK`**:
+```json
+{
+  "message": "Perfil actualizado exitosamente",
+  "user": {
+    "id": "7fa84d12-bf9e-4e31-893c-fa58913d9641",
+    "email": "user@example.com",
+    "role": "CLIENT",
+    "fullName": "Maria Gonzalez Perez",
+    "phone": "+52 442 987 6543",
+    "shippingAddress": "Av. Universidad 120, Col. Centro, Queretaro, Qro. CP 76000"
+  }
+}
+```
+
+#### `PUT /api/auth/change-password`
+Modifies the account password after verifying current credentials.
+
+- **Access**: Authenticated (`requireAuth`)
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**:
+```json
+{
+  "currentPassword": "SecurePassword123!",
+  "newPassword": "NewStrongPassword456!"
+}
+```
+- **Responses**:
+  - `200 OK`: Password updated successfully.
+  - `400 Bad Request`: Incorrect current password or invalid new password length.
+
 ---
 
 ### 3. Workshops
@@ -153,6 +218,31 @@ Retrieves all registered workshops ordered chronologically by scheduled date.
     ],
     "createdAt": "2026-09-20T12:00:00.000Z",
     "updatedAt": "2026-09-20T12:00:00.000Z"
+  }
+]
+```
+
+#### `GET /api/workshops/my-enrollments`
+Retrieves workshop enrollments for the logged-in user with nested workshop details.
+
+- **Access**: Authenticated (`requireAuth`)
+- **Headers**: `Authorization: Bearer <token>`
+- **Response `200 OK`**:
+```json
+[
+  {
+    "id": "e305e552-3fb3-4f99-a86d-3e2840bfa120",
+    "workshopId": "4ba3fc67-937d-41ae-8f3a-c322b7a9debf",
+    "paymentStatus": "PENDING",
+    "Workshop": {
+      "id": "4ba3fc67-937d-41ae-8f3a-c322b7a9debf",
+      "title": "Introduccion a la Hidroponia Casera",
+      "description": "Fundamentos y sistemas NFT para el hogar.",
+      "scheduledDate": "2026-10-15T16:00:00.000Z",
+      "price": "350.00",
+      "imageUrl": "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae",
+      "modality": "Presencial"
+    }
   }
 ]
 ```

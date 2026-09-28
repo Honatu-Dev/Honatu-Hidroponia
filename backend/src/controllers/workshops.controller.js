@@ -79,19 +79,41 @@ export const enrollWorkshop = async (req, res) => {
   }
 };
 
-// 3. Crear un nuevo taller (Solo Admins)
+// 3. Obtener las inscripciones del usuario autenticado actual
+export const getMyEnrollments = async (req, res) => {
+  try {
+    const enrollments = await WorkshopEnrollment.findAll({
+      where: { userId: req.user.id },
+      include: [
+        {
+          model: Workshop,
+          attributes: ['id', 'title', 'description', 'scheduledDate', 'price', 'imageUrl', 'modality']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json(enrollments);
+  } catch (error) {
+    console.error('Error in getMyEnrollments:', error);
+    res.status(500).json({ message: 'Error al obtener tus inscripciones a talleres.' });
+  }
+};
+
+// 4. Crear un nuevo taller (Solo Admins)
 export const createWorkshop = async (req, res) => {
   try {
-    const { title, scheduledDate, capacity, price } = req.body;
-    
-    // Aquí idealmente validaríamos que el usuario que hace esto es ADMIN
-    // (lo haremos desde las rutas con un middleware en el futuro)
+    const { title, scheduledDate, capacity, price, description, imageUrl, modality, agenda } = req.body;
     
     const workshop = await Workshop.create({
       title,
+      description,
       scheduledDate,
       capacity,
-      price
+      price,
+      imageUrl,
+      modality,
+      agenda
     });
 
     res.status(201).json({

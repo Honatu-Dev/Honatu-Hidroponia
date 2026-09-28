@@ -1,5 +1,10 @@
 import express from 'express';
-import { getWorkshops, enrollWorkshop, createWorkshop } from '../controllers/workshops.controller.js';
+import {
+  getWorkshops,
+  enrollWorkshop,
+  getMyEnrollments,
+  createWorkshop
+} from '../controllers/workshops.controller.js';
 import { optionalAuth, requireAuth, requireAdmin } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
@@ -28,6 +33,41 @@ const router = express.Router();
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/', getWorkshops);
+
+/**
+ * @openapi
+ * /api/workshops/my-enrollments:
+ *   get:
+ *     summary: Obtener talleres donde el usuario actual está inscrito
+ *     tags: [Workshops]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de inscripciones y detalles de los talleres del usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     format: uuid
+ *                   paymentStatus:
+ *                     type: string
+ *                     example: PENDING
+ *                   Workshop:
+ *                     $ref: '#/components/schemas/Workshop'
+ *       401:
+ *         description: No autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/my-enrollments', requireAuth, getMyEnrollments);
 
 /**
  * @openapi
