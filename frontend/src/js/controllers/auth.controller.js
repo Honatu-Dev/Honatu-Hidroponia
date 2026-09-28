@@ -47,7 +47,8 @@ export function getClientAccountUrl() {
   return resolveRelativePath('pages/auth/account.html');
 }
 
-export function logout(customRedirect = null) {
+export function logout(customRedirect = null, notify = true) {
+  localStorage.removeItem('honatu_token');
   removeItem(StorageKeys.AUTH);
   removeItem(StorageKeys.AUTH_ROLE);
   removeItem(StorageKeys.AUTH_USER);
@@ -55,7 +56,11 @@ export function logout(customRedirect = null) {
   authRole = null;
   authUser = null;
 
-  showToast("Has cerrado sesión exitosamente.");
+  updateNavbarUserState(null);
+
+  if (notify) {
+    showToast("Has cerrado sesión exitosamente.");
+  }
 
   setTimeout(() => {
     if (customRedirect) {
@@ -63,7 +68,70 @@ export function logout(customRedirect = null) {
     } else {
       window.location.href = getLoginUrl();
     }
-  }, 400);
+  }, notify ? 400 : 0);
+}
+
+export function updateNavbarUserState(user) {
+  const toggles = document.querySelectorAll('#userLoginToggle, .nav-user-toggle');
+  toggles.forEach(toggle => {
+    if (user) {
+      toggle.classList.add('is-authenticated');
+      toggle.setAttribute('title', `${user.name || user.fullName || 'Mi Cuenta'} (${user.role})`);
+      let dot = toggle.querySelector('.user-online-dot');
+      if (!dot) {
+        dot = document.createElement('span');
+        dot.className = 'user-online-dot';
+        dot.style.cssText = 'position: absolute; bottom: 2px; right: 2px; width: 9px; height: 9px; background: #6A8D45; border-radius: 50%; border: 1.5px solid #fff;';
+        toggle.style.position = 'relative';
+        toggle.appendChild(dot);
+      }
+    } else {
+      toggle.classList.remove('is-authenticated');
+      toggle.setAttribute('title', 'Mi Cuenta');
+      toggle.querySelector('.user-online-dot')?.remove();
+    }
+  });
+}
+
+export async function verifySession() {
+  const token = localStorage.getItem('honatu_token');
+  if (!token) {
+    updateNavbarUserState(null);
+    return null;
+  }
+
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      isAuthenticated = true;
+      authRole = data.user.role;
+      authUser = data.user;
+
+      setString(StorageKeys.AUTH, 'true');
+      setString(StorageKeys.AUTH_ROLE, data.user.role);
+      setItem(StorageKeys.AUTH_USER, data.user);
+
+      updateNavbarUserState(data.user);
+      return data.user;
+    } else if (response.status === 401) {
+      logout(null, false);
+      return null;
+    }
+  } catch (error) {
+    console.warn('Backend session verification offline:', error.message);
+  }
+
+  const cachedUser = getAuthUser();
+  if (cachedUser && getIsAuthenticated()) {
+    updateNavbarUserState(cachedUser);
+  }
+  return cachedUser;
 }
 
 export function requireAdminAuth(redirectToLogin = true) {
@@ -476,6 +544,7 @@ export function requireAuth(onSuccess, redirectTo, subtitle) {
 
 export function initAuth() {
   ensureAuthModalDOM();
+  verifySession();
 
   // Attach to navbar account button
   document.querySelectorAll('#userLoginToggle, .nav-user-toggle').forEach(btn => {
@@ -516,5 +585,7 @@ window.isAdmin = isAdmin;
 window.loginAsClient = loginAsClient;
 window.loginAsAdmin = loginAsAdmin;
 window.logout = logout;
+window.verifySession = verifySession;
+window.updateNavbarUserState = updateNavbarUserState;
 
 

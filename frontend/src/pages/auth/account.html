@@ -320,6 +320,13 @@
                 </svg>
                 Datos Personales
               </button>
+              <button class="account-nav-btn" data-tab="tab-workshops">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                Mis Talleres
+              </button>
               <button class="account-nav-btn" data-tab="tab-orders">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -365,28 +372,37 @@
               <form id="profileForm" class="login-form">
                 <div class="form-grid">
                   <div class="form-group">
-                    <label class="form-label" for="accFirstName">Nombre(s)</label>
-                    <input type="text" id="accFirstName" class="form-input" value="Carlos" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="accLastName">Apellidos</label>
-                    <input type="text" id="accLastName" class="form-input" value="Mendoza" required>
-                  </div>
-                </div>
-
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label class="form-label" for="accEmail">Correo Electrónico</label>
-                    <input type="email" id="accEmail" class="form-input" value="carlos.mendoza@ejemplo.com" required>
+                    <label class="form-label" for="accFullName">Nombre Completo</label>
+                    <input type="text" id="accFullName" class="form-input" placeholder="Tu nombre completo" required>
                   </div>
                   <div class="form-group">
                     <label class="form-label" for="accPhone">Teléfono de Contacto</label>
-                    <input type="tel" id="accPhone" class="form-input" value="+52 442 987 6543">
+                    <input type="tel" id="accPhone" class="form-input" placeholder="+52 442 000 0000">
                   </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Guardar Cambios &rarr;</button>
+                <div class="form-group">
+                  <label class="form-label" for="accEmail">Correo Electrónico (Registrado)</label>
+                  <input type="email" id="accEmail" class="form-input" readonly style="background: var(--color-gray-100); color: var(--color-gray-600); cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="accShippingAddress">Dirección de Envío Principal</label>
+                  <input type="text" id="accShippingAddress" class="form-input" placeholder="Calle, Número, Colonia, Código Postal, Ciudad">
+                </div>
+
+                <button type="submit" id="saveProfileBtn" class="btn btn-primary" style="margin-top: 16px;">Guardar Cambios &rarr;</button>
               </form>
+            </div>
+
+            <!-- TAB: MIS TALLERES -->
+            <div id="tab-workshops" class="account-tab-content">
+              <h2 class="account-title">Mis Talleres Inscritos</h2>
+              <p class="account-subtitle">Consulta los talleres educativos a los que te has registrado y sus fechas.</p>
+
+              <div id="myWorkshopsList">
+                <p style="color: var(--color-gray-500); font-size: 0.95rem;">Cargando tus inscripciones...</p>
+              </div>
             </div>
 
             <!-- TAB 2: MIS PEDIDOS -->
@@ -532,22 +548,116 @@
   </aside>
 
   <script type="module">
-    import { getAuthUser, isAdmin, logout } from '../../js/controllers/auth.controller.js';
+    import { getAuthUser, isAdmin, logout, verifySession } from '../../js/controllers/auth.controller.js';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const user = getAuthUser();
-      if (user) {
-        document.getElementById('profileDisplayName').textContent = user.name || 'Cultivador Honatu';
-        document.getElementById('profileDisplayEmail').textContent = user.email || 'cliente@honatu.com';
-        const avatar = document.getElementById('profileDisplayAvatar');
-        if (avatar) avatar.textContent = (user.name || 'H').charAt(0).toUpperCase();
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('honatu_token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
 
-        if (isAdmin()) {
-          const badgeCont = document.getElementById('adminBadgeContainer');
-          if (badgeCont) badgeCont.style.display = 'block';
+      // 1. Obtener y poblar datos del usuario desde /api/auth/me
+      async function loadProfile() {
+        try {
+          const res = await fetch('http://localhost:5000/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (!res.ok) {
+            logout('login.html', false);
+            return;
+          }
+
+          const data = await res.json();
+          const user = data.user;
+
+          const displayName = user.fullName || user.name || user.email;
+          document.getElementById('profileDisplayName').textContent = displayName;
+          document.getElementById('profileDisplayEmail').textContent = user.email;
+          const avatar = document.getElementById('profileDisplayAvatar');
+          if (avatar) avatar.textContent = displayName.charAt(0).toUpperCase();
+
+          document.getElementById('accFullName').value = user.fullName || user.name || '';
+          document.getElementById('accEmail').value = user.email || '';
+          document.getElementById('accPhone').value = user.phone || '';
+          document.getElementById('accShippingAddress').value = user.shippingAddress || '';
+
+          if (user.role === 'ADMIN') {
+            const badgeCont = document.getElementById('adminBadgeContainer');
+            if (badgeCont) badgeCont.style.display = 'block';
+          }
+        } catch (error) {
+          console.error('Error cargando perfil:', error);
         }
       }
 
+      // 2. Obtener inscripciones de talleres
+      async function loadMyWorkshops() {
+        const container = document.getElementById('myWorkshopsList');
+        if (!container) return;
+
+        try {
+          const res = await fetch('http://localhost:5000/api/workshops/my-enrollments', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (!res.ok) {
+            container.innerHTML = '<p style="color: var(--color-gray-500);">No se pudieron cargar tus talleres.</p>';
+            return;
+          }
+
+          const enrollments = await res.json();
+          if (enrollments.length === 0) {
+            container.innerHTML = `
+              <div style="text-align: center; padding: var(--space-2xl) var(--space-md); border: 1px dashed var(--color-gray-300); border-radius: var(--radius-md);">
+                <p style="font-size: 1.05rem; font-weight: 600; color: var(--color-forest); margin-bottom: 6px;">Aún no te has inscrito a ningún taller.</p>
+                <p style="font-size: 0.9rem; color: var(--color-gray-500); margin-bottom: 16px;">Aprende hidroponía residencial guiado por profesionales agrónomos.</p>
+                <a href="../education/workshops.html" class="btn btn-primary btn-sm">Ver Próximos Talleres &rarr;</a>
+              </div>
+            `;
+            return;
+          }
+
+          container.innerHTML = enrollments.map(item => {
+            const ws = item.Workshop || {};
+            const dateStr = ws.scheduledDate ? new Date(ws.scheduledDate).toLocaleDateString('es-MX', {
+              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            }) : 'Fecha por confirmar';
+
+            return `
+              <div class="order-card" style="margin-bottom: var(--space-md);">
+                <div class="order-header">
+                  <div>
+                    <span class="order-id">${ws.title || 'Taller de Hidroponía'}</span>
+                    <span style="font-size: 0.8rem; color: var(--color-gray-500); margin-left: 8px;">Modalidad: ${ws.modality || 'Presencial'}</span>
+                  </div>
+                  <span class="badge-status" style="background: ${item.paymentStatus === 'PAID' ? 'var(--color-sage-light)' : 'rgba(217, 119, 6, 0.15)'}; color: ${item.paymentStatus === 'PAID' ? 'var(--color-forest-dark)' : '#b45309'};">
+                    ${item.paymentStatus === 'PAID' ? 'Confirmado' : 'Inscrito (Pago Pendiente)'}
+                  </span>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--color-gray-600); margin-bottom: 8px;">
+                  <strong>Fecha:</strong> ${dateStr}
+                </p>
+                ${ws.description ? `<p style="font-size: 0.85rem; color: var(--color-gray-500); line-height: 1.4; margin-bottom: 12px;">${ws.description}</p>` : ''}
+                <div class="order-footer">
+                  <span>Inversión: $${ws.price ? Number(ws.price).toLocaleString('es-MX') : '0.00'} MXN</span>
+                  <a href="../education/workshops.html" style="color: var(--color-forest); text-decoration: underline; font-size: 0.85rem;">Detalles del Taller</a>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+        } catch (error) {
+          console.error('Error cargando talleres:', error);
+          container.innerHTML = '<p style="color: var(--color-terracotta);">Error al conectar con el servidor.</p>';
+        }
+      }
+
+      await loadProfile();
+      await loadMyWorkshops();
+
+      // 3. Tab Navigation
       const navBtns = document.querySelectorAll('.account-nav-btn[data-tab]');
       const tabContents = document.querySelectorAll('.account-tab-content');
 
@@ -563,34 +673,91 @@
         });
       });
 
+      // 4. Actualizar información de perfil
       const profileForm = document.getElementById('profileForm');
       if (profileForm) {
-        profileForm.addEventListener('submit', (e) => {
+        profileForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          const first = document.getElementById('accFirstName').value;
-          const last = document.getElementById('accLastName').value;
-          const email = document.getElementById('accEmail').value;
+          const fullName = document.getElementById('accFullName').value.trim();
+          const phone = document.getElementById('accPhone').value.trim();
+          const shippingAddress = document.getElementById('accShippingAddress').value.trim();
+          const submitBtn = document.getElementById('saveProfileBtn');
 
-          document.getElementById('profileDisplayName').textContent = `${first} ${last}`;
-          document.getElementById('profileDisplayEmail').textContent = email;
+          if (submitBtn) submitBtn.disabled = true;
 
-          if (window.showToast) {
-            window.showToast("¡Información personal actualizada con éxito!");
+          try {
+            const res = await fetch('http://localhost:5000/api/auth/profile', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ fullName, phone, shippingAddress })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+              document.getElementById('profileDisplayName').textContent = fullName;
+              const avatar = document.getElementById('profileDisplayAvatar');
+              if (avatar) avatar.textContent = fullName.charAt(0).toUpperCase();
+
+              if (window.showToast) window.showToast("¡Información personal actualizada con éxito!");
+              else alert("Perfil actualizado correctamente");
+            } else {
+              if (window.showToast) window.showToast(data.message || "Error al actualizar perfil", "error");
+              else alert(data.message);
+            }
+          } catch (err) {
+            console.error('Error:', err);
+            if (window.showToast) window.showToast("Error de conexión al guardar cambios", "error");
+          } finally {
+            if (submitBtn) submitBtn.disabled = false;
           }
         });
       }
 
+      // 5. Cambio de contraseña
       const securityForm = document.getElementById('securityForm');
       if (securityForm) {
-        securityForm.addEventListener('submit', (e) => {
+        securityForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          if (window.showToast) {
-            window.showToast("¡Contraseña actualizada correctamente!");
+          const currentPassword = document.getElementById('currPass').value;
+          const newPassword = document.getElementById('newPass').value;
+          const confirmPassword = document.getElementById('confirmPass').value;
+
+          if (newPassword !== confirmPassword) {
+            if (window.showToast) window.showToast("Las nuevas contraseñas no coinciden.", "error");
+            else alert("Las nuevas contraseñas no coinciden.");
+            return;
           }
-          securityForm.reset();
+
+          try {
+            const res = await fetch('http://localhost:5000/api/auth/change-password', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ currentPassword, newPassword })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+              if (window.showToast) window.showToast("¡Contraseña actualizada exitosamente!");
+              else alert("Contraseña actualizada exitosamente.");
+              securityForm.reset();
+            } else {
+              if (window.showToast) window.showToast(data.message || "Error al actualizar contraseña", "error");
+              else alert(data.message);
+            }
+          } catch (err) {
+            console.error(err);
+            if (window.showToast) window.showToast("Error de conexión al cambiar contraseña", "error");
+          }
         });
       }
 
+      // 6. Cerrar Sesión
       const logoutBtn = document.getElementById('logoutBtn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
