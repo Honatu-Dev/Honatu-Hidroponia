@@ -48,4 +48,4 @@ Thumbs.db
 .temp/
 .cache/
 .vite/
-schema.sql
+/schema.sql
