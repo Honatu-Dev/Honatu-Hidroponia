@@ -7,6 +7,13 @@ import {
   changePassword
 } from '../controllers/auth.controller.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
+import { handleValidationErrors } from '../middlewares/validate.js';
+import {
+  registerValidator,
+  loginValidator,
+  updateProfileValidator,
+  changePasswordValidator
+} from '../middlewares/validators/auth.validator.js';
 
 const router = express.Router();
 
@@ -42,7 +49,7 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/register', register);
+router.post('/register', registerValidator, handleValidationErrors, register);
 
 /**
  * @openapi
@@ -82,7 +89,7 @@ router.post('/register', register);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/login', login);
+router.post('/login', loginValidator, handleValidationErrors, login);
 
 /**
  * @openapi
@@ -151,7 +158,7 @@ router.get('/me', requireAuth, getMe);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.put('/profile', requireAuth, updateProfile);
+router.put('/profile', requireAuth, updateProfileValidator, handleValidationErrors, updateProfile);
 
 /**
  * @openapi
@@ -191,6 +198,6 @@ router.put('/profile', requireAuth, updateProfile);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.put('/change-password', requireAuth, changePassword);
+router.put('/change-password', requireAuth, changePasswordValidator, handleValidationErrors, changePassword);
 
 export default router;

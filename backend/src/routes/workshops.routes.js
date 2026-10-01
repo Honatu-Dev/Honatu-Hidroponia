@@ -6,6 +6,11 @@ import {
   createWorkshop
 } from '../controllers/workshops.controller.js';
 import { optionalAuth, requireAuth, requireAdmin } from '../middlewares/auth.middleware.js';
+import { handleValidationErrors } from '../middlewares/validate.js';
+import {
+  enrollWorkshopValidator,
+  createWorkshopValidator
+} from '../middlewares/validators/workshops.validator.js';
 
 const router = express.Router();
 
@@ -117,7 +122,7 @@ router.get('/my-enrollments', requireAuth, getMyEnrollments);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/enroll', optionalAuth, enrollWorkshop);
+router.post('/enroll', optionalAuth, enrollWorkshopValidator, handleValidationErrors, enrollWorkshop);
 
 /**
  * @openapi
@@ -166,6 +171,6 @@ router.post('/enroll', optionalAuth, enrollWorkshop);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/', requireAuth, requireAdmin, createWorkshop);
+router.post('/', requireAuth, requireAdmin, createWorkshopValidator, handleValidationErrors, createWorkshop);
 
 export default router;
