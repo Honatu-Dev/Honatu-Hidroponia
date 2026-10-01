@@ -1,4 +1,5 @@
 import { AUTH_VINE_DECORATION } from './auth.controller.js';
+import { apiFetch } from '../config.js';
 
 export function initWorkshops() {
   const overlay = document.getElementById('workshopOverlay');
@@ -18,9 +19,10 @@ export function initWorkshops() {
   // Current selected workshop ID
   let currentWorkshopId = null;
   let workshopsData = [];
+  let pastGridEmptyTimeout = null;
 
   // 1. Fetch workshops to get their IDs
-  fetch('http://localhost:5000/api/workshops')
+  apiFetch('/api/workshops')
     .then(res => res.json())
     .then(data => {
       workshopsData = data;
@@ -49,7 +51,7 @@ export function initWorkshops() {
             article.className = 'workshop-card';
             article.innerHTML = `
               <div class="workshop-img">
-                <img src="${ws.imageUrl || '../../assets/images/placeholder.jpg'}" alt="${ws.title}" loading="lazy">
+                <img src="${ws.imageUrl || 'https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_800,h_600/Huerto'}" alt="${ws.title}" loading="lazy">
                 <span class="workshop-badge ${badgeClass}">${ws.modality}</span>
               </div>
               <div class="workshop-body">
@@ -98,7 +100,7 @@ export function initWorkshops() {
             const div = document.createElement('div');
             div.className = 'past-card';
             div.innerHTML = `
-              <img src="${ws.imageUrl || '../../assets/images/placeholder.jpg'}" alt="${ws.title}" loading="lazy">
+              <img src="${ws.imageUrl || 'https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_800,h_600/Huerto'}" alt="${ws.title}" loading="lazy">
               <div class="past-card-body">
                 <div class="past-card-title">${ws.title}</div>
                 <div class="past-card-meta">${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)} · ${ws.modality}</div>
@@ -129,6 +131,9 @@ export function initWorkshops() {
         }
       }
 
+      // Cancel the fallback empty-state timeout since data already loaded
+      if (pastGridEmptyTimeout) clearTimeout(pastGridEmptyTimeout);
+
       // Bind events to the newly created buttons
       document.querySelectorAll('.btn-register-workshop').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -149,7 +154,30 @@ export function initWorkshops() {
         });
       });
     })
-    .catch(err => console.error('Error fetching workshops:', err));
+    .catch(err => {
+      console.error('Error fetching workshops:', err);
+      if (pastGridEmptyTimeout) clearTimeout(pastGridEmptyTimeout);
+      if (pastGrid) {
+        pastGrid.innerHTML = `
+          <div class="empty-state">
+            <svg class="empty-state-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <path d="M8 14h.01"></path>
+              <path d="M12 14h.01"></path>
+              <path d="M16 14h.01"></path>
+              <path d="M8 18h.01"></path>
+              <path d="M12 18h.01"></path>
+              <path d="M16 18h.01"></path>
+            </svg>
+            <h3>Sin registros históricos</h3>
+            <p>No se pudieron cargar los talleres pasados. Intenta recargar la página.</p>
+          </div>
+        `;
+      }
+    });
 
   const pastGrid = document.getElementById('pastWorkshopGrid');
   if (pastGrid) {
@@ -177,7 +205,7 @@ export function initWorkshops() {
       </article>
     `;
 
-    setTimeout(() => {
+    pastGridEmptyTimeout = setTimeout(() => {
       pastGrid.innerHTML = `
         <div class="empty-state">
           <svg class="empty-state-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -225,16 +253,9 @@ export function initWorkshops() {
     const phone = document.getElementById('wsPhone').value;
 
     try {
-      // Intentar obtener el token por si el usuario sí está logueado
-      const token = localStorage.getItem('honatu_token');
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch('http://localhost:5000/api/workshops/enroll', {
+      const response = await apiFetch('/api/workshops/enroll', {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           workshopId: currentWorkshopId,
           guestName: name,

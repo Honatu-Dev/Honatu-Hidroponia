@@ -25,6 +25,7 @@ export default defineConfig({
         gracias: resolve(__dirname, 'src/pages/shop/thanks.html'),
         admin: resolve(__dirname, 'src/pages/admin/admin.html'),
         login: resolve(__dirname, 'src/pages/auth/login.html'),
+        register: resolve(__dirname, 'src/pages/auth/register.html'),
       },
     },
   },
