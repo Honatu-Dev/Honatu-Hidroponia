@@ -28,11 +28,11 @@ export const cloudinaryConfig = {
   },
 
   /**
-   * Check if Cloudinary is properly configured in the environment
+   * Check if Cloudinary delivery is properly configured in the environment
    * @returns {boolean}
    */
   isConfigured() {
-    return Boolean(this.cloudName && this.uploadPreset);
+    return Boolean(this.cloudName);
   }
 };
 
