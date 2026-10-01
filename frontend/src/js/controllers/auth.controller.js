@@ -288,11 +288,11 @@ function ensureAuthModalDOM() {
         <form id="modalLoginForm" class="login-form">
           <div class="form-group">
             <label class="form-label" for="modalLoginEmail">Correo Electrónico</label>
-            <input type="email" id="modalLoginEmail" class="form-input" placeholder="tu@correo.com" autocomplete="username">
+            <input type="email" id="modalLoginEmail" class="form-input" placeholder="tu@correo.com" autocomplete="username" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="modalLoginPassword">Contraseña</label>
-            <input type="password" id="modalLoginPassword" class="form-input" placeholder="Tu contraseña" autocomplete="current-password">
+            <input type="password" id="modalLoginPassword" class="form-input" placeholder="Tu contraseña" autocomplete="current-password" required>
           </div>
 
           <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
@@ -317,7 +317,7 @@ function ensureAuthModalDOM() {
           </div>
           <div class="form-group">
             <label class="form-label" for="modalRegPassword">Contraseña</label>
-            <input type="password" id="modalRegPassword" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6" required>
+            <input type="password" id="modalRegPassword" class="form-input" placeholder="Mínimo 8 caracteres" minlength="8" required>
           </div>
           <button type="submit" class="btn btn-terracotta" style="width: 100%; justify-content: center;">
             Crear Cuenta y Continuar &rarr;
@@ -399,8 +399,7 @@ function bindModalEvents() {
           message: `¡Bienvenido(a) de nuevo! Sesión iniciada.`
         });
       } else {
-        if (window.showToast) window.showToast(data.message || 'Credenciales incorrectas', 'error');
-        else alert(data.message || 'Credenciales incorrectas');
+        showToast(data.message || 'Credenciales incorrectas', 'error');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -435,8 +434,7 @@ function bindModalEvents() {
           message: `¡Bienvenido(a), ${displayName}! Tu cuenta ha sido creada.`
         });
       } else {
-        if (window.showToast) window.showToast(data.message || 'Error al crear cuenta', 'error');
-        else alert(data.message || 'Error al crear cuenta');
+        showToast(data.message || 'Error al crear cuenta', 'error');
       }
     } catch (error) {
       console.error('Registration error:', error);

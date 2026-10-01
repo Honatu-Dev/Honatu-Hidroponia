@@ -407,8 +407,6 @@
 
             if (window.showToast) {
               window.showToast(`¡Cita agendada! ${dateStr} a las ${selectedTime}. Te contactaremos para confirmar.`);
-            } else {
-              alert(`¡Cita agendada exitosamente!\n\n${dateStr} a las ${selectedTime}\n\nTe contactaremos por correo y WhatsApp para confirmar.`);
             }
             bookingForm.reset();
             selectedDate = null;

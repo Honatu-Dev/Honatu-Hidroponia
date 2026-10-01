@@ -276,19 +276,27 @@
         <p id="workshopSelectedName" style="font-weight: 600; color: var(--color-terracotta); margin-top: 4px;"></p>
       </div>
       <form id="workshopForm" class="login-form">
-        <div class="form-group">
-          <label class="form-label" for="wsName">Nombre Completo</label>
-          <input type="text" id="wsName" class="form-input" required placeholder="Tu nombre">
+        <div id="workshopLoggedInMessage" class="form-group" style="display: none; background: rgba(94, 130, 84, 0.08); border: 1px solid rgba(94, 130, 84, 0.25); border-radius: var(--radius-md); padding: 16px; text-align: center;">
+          <p style="margin: 0; color: var(--color-forest); font-weight: 600;">
+            Te registras con tu cuenta Honatu.
+          </p>
+          <p id="workshopLoggedInDetails" style="margin: 6px 0 0; font-size: 0.9rem; color: var(--color-gray-600);"></p>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="wsEmail">Correo Electrónico</label>
-          <input type="email" id="wsEmail" class="form-input" required placeholder="correo@ejemplo.com">
+        <div id="workshopGuestFields">
+          <div class="form-group">
+            <label class="form-label" for="wsName">Nombre Completo</label>
+            <input type="text" id="wsName" class="form-input" required placeholder="Tu nombre" minlength="2">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wsEmail">Correo Electrónico</label>
+            <input type="email" id="wsEmail" class="form-input" required placeholder="correo@ejemplo.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wsPhone">Teléfono / WhatsApp</label>
+            <input type="tel" id="wsPhone" class="form-input" placeholder="55 1234 5678" inputmode="tel" pattern="[\\+0-9\\s\\-]{7,50}">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="wsPhone">Teléfono / WhatsApp</label>
-          <input type="tel" id="wsPhone" class="form-input" required placeholder="55 1234 5678">
-        </div>
-        <button type="submit" class="btn btn-primary"
+        <button type="submit" id="workshopSubmitBtn" class="btn btn-primary"
           style="width: 100%; justify-content: center; margin-top: 12px;">Confirmar mi Registro &rarr;</button>
       </form>
     </div>

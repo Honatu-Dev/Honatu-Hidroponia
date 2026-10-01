@@ -328,7 +328,7 @@
 
         <div class="form-group">
           <label class="form-label" for="regPhone">Teléfono / WhatsApp</label>
-          <input type="tel" id="regPhone" class="form-input" placeholder="+52 442 000 0000">
+          <input type="tel" id="regPhone" class="form-input" placeholder="+52 442 000 0000" inputmode="tel" pattern="[\\+0-9\\s\\-]{7,50}">
         </div>
 
         <div class="form-group">
@@ -338,7 +338,7 @@
 
         <div class="form-group">
           <label class="form-label" for="regPass">Contraseña</label>
-          <input type="password" id="regPass" class="form-input" placeholder="Mínimo 6 caracteres" required>
+          <input type="password" id="regPass" class="form-input" placeholder="Mínimo 8 caracteres" minlength="8" required>
         </div>
 
         <button type="submit" class="btn-submit-main" id="btnRegister">
@@ -364,6 +364,7 @@
 
   <script type="module">
     import { setString, setItem, StorageKeys } from '../../js/middleware/storage.middleware.js';
+    import { showToast } from '../../js/middleware/toast.middleware.js';
     import { apiFetch } from '../../js/config.js';
 
     document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
@@ -388,7 +389,7 @@
         const data = await response.json();
 
         if (!response.ok) {
-          alert(data.message || 'Error al registrar');
+          showToast(data.message || 'Error al registrar', 'error');
           btn.innerHTML = originalText;
           btn.disabled = false;
           return;
@@ -403,13 +404,13 @@
         setString('honatu_token', data.token); // Custom token key
         setString(StorageKeys.AUTH_ROLE, user.role);
         setItem(StorageKeys.AUTH_USER, user);
-        
-        alert("¡Cuenta creada exitosamente!");
+
+        showToast("¡Cuenta creada exitosamente!");
         window.location.href = 'account.html';
 
       } catch (error) {
         console.error("Error connecting to backend:", error);
-        alert('Error de conexión con el servidor. ¿Está encendido el backend?');
+        showToast('Error de conexión con el servidor. ¿Está encendido el backend?', 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
       }

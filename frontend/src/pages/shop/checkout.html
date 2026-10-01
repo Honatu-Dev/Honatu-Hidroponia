@@ -222,8 +222,8 @@
           if (cart.length === 0) {
             if (typeof showToast === 'function') {
               showToast("Tu carrito está vacío.");
-            } else {
-              alert("Tu carrito está vacío.");
+            } else if (window.showToast) {
+              window.showToast("Tu carrito está vacío.", 'error');
             }
             return;
           }

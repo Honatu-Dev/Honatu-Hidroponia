@@ -355,7 +355,7 @@
                   </div>
                   <div class="form-group">
                     <label class="form-label" for="accPhone">Teléfono de Contacto</label>
-                    <input type="tel" id="accPhone" class="form-input" placeholder="+52 442 000 0000">
+                    <input type="tel" id="accPhone" class="form-input" placeholder="+52 442 000 0000" inputmode="tel" pattern="[\\+0-9\\s\\-]{7,50}">
                   </div>
                 </div>
 
@@ -440,6 +440,8 @@
   <script type="module">
     import { getAuthUser, isAdmin, logout, verifySession } from '../../js/controllers/auth.controller.js';
     import { apiFetch } from '../../js/config.js';
+    import { escapeHtml, escapeAttr } from '../../js/utils/dom.js';
+    import { showToast } from '../../js/middleware/toast.middleware.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
       const token = localStorage.getItem('honatu_token');
@@ -511,24 +513,32 @@
             const dateStr = ws.scheduledDate ? new Date(ws.scheduledDate).toLocaleDateString('es-MX', {
               weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
             }) : 'Fecha por confirmar';
+            const title = escapeHtml(ws.title || 'Taller de Hidroponía');
+            const modality = escapeHtml(ws.modality || 'Presencial');
+            const description = ws.description ? escapeHtml(ws.description) : '';
+            const price = ws.price ? Number(ws.price).toLocaleString('es-MX') : '0.00';
+            const paid = item.paymentStatus === 'PAID';
+            const statusLabel = paid ? 'Confirmado' : 'Inscrito (Pago Pendiente)';
+            const statusBg = paid ? 'var(--color-sage-light)' : 'rgba(217, 119, 6, 0.15)';
+            const statusColor = paid ? 'var(--color-forest-dark)' : '#b45309';
 
             return `
               <div class="order-card" style="margin-bottom: var(--space-md);">
                 <div class="order-header">
                   <div>
-                    <span class="order-id">${ws.title || 'Taller de Hidroponía'}</span>
-                    <span style="font-size: 0.8rem; color: var(--color-gray-500); margin-left: 8px;">Modalidad: ${ws.modality || 'Presencial'}</span>
+                    <span class="order-id">${title}</span>
+                    <span style="font-size: 0.8rem; color: var(--color-gray-500); margin-left: 8px;">Modalidad: ${modality}</span>
                   </div>
-                  <span class="badge-status" style="background: ${item.paymentStatus === 'PAID' ? 'var(--color-sage-light)' : 'rgba(217, 119, 6, 0.15)'}; color: ${item.paymentStatus === 'PAID' ? 'var(--color-forest-dark)' : '#b45309'};">
-                    ${item.paymentStatus === 'PAID' ? 'Confirmado' : 'Inscrito (Pago Pendiente)'}
+                  <span class="badge-status" style="background: ${escapeAttr(statusBg)}; color: ${escapeAttr(statusColor)};">
+                    ${statusLabel}
                   </span>
                 </div>
                 <p style="font-size: 0.9rem; color: var(--color-gray-600); margin-bottom: 8px;">
-                  <strong>Fecha:</strong> ${dateStr}
+                  <strong>Fecha:</strong> ${escapeHtml(dateStr)}
                 </p>
-                ${ws.description ? `<p style="font-size: 0.85rem; color: var(--color-gray-500); line-height: 1.4; margin-bottom: 12px;">${ws.description}</p>` : ''}
+                ${description ? `<p style="font-size: 0.85rem; color: var(--color-gray-500); line-height: 1.4; margin-bottom: 12px;">${description}</p>` : ''}
                 <div class="order-footer">
-                  <span>Inversión: $${ws.price ? Number(ws.price).toLocaleString('es-MX') : '0.00'} MXN</span>
+                  <span>Inversión: $${price} MXN</span>
                   <a href="../education/workshops.html" style="color: var(--color-forest); text-decoration: underline; font-size: 0.85rem;">Detalles del Taller</a>
                 </div>
               </div>
@@ -585,11 +595,9 @@
               const avatar = document.getElementById('profileDisplayAvatar');
               if (avatar) avatar.textContent = fullName.charAt(0).toUpperCase();
 
-              if (window.showToast) window.showToast("¡Información personal actualizada con éxito!");
-              else alert("Perfil actualizado correctamente");
+              showToast("¡Información personal actualizada con éxito!");
             } else {
-              if (window.showToast) window.showToast(data.message || "Error al actualizar perfil", "error");
-              else alert(data.message);
+              showToast(data.message || "Error al actualizar perfil", "error");
             }
           } catch (err) {
             console.error('Error:', err);

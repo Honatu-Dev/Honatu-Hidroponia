@@ -6,6 +6,7 @@
 import { getItem, setItem, StorageKeys } from '../middleware/storage.middleware.js';
 import { getCloudinaryUrl } from '../services/cloudinary.service.js';
 import { showToast } from '../middleware/toast.middleware.js';
+import { escapeHtml, escapeAttr } from '../utils/dom.js';
 
 const SVG_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
@@ -40,23 +41,26 @@ function renderCart() {
         '<p class="cart-empty-sub">Explora nuestros productos y empieza a cultivar</p>' +
       '</div>';
   } else {
-    cartItems.innerHTML = cart.map(item =>
-      '<div class="cart-item" data-cart-id="' + item.id + '">' +
-        '<img src="' + getCloudinaryUrl(item.img, { width: 120, height: 120, crop: 'fill' }) + '" alt="' + item.name + '" class="cart-item-img">' +
-        '<div class="cart-item-info">' +
-          '<div class="cart-item-name">' + item.name + '</div>' +
-          '<div class="cart-item-price">$' + item.price.toLocaleString('es-MX') + ' MXN</div>' +
-          '<div class="cart-item-qty">' +
-            '<button class="qty-btn" data-action="decrease" data-id="' + item.id + '">&minus;</button>' +
-            '<span>' + item.qty + '</span>' +
-            '<button class="qty-btn" data-action="increase" data-id="' + item.id + '">+</button>' +
-          '</div>' +
-        '</div>' +
-        '<button class="cart-item-remove" data-action="remove" data-id="' + item.id + '">' +
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-        '</button>' +
-      '</div>'
-    ).join('');
+    cartItems.innerHTML = cart.map(item => {
+      const name = escapeHtml(item.name);
+      const itemId = escapeAttr(item.id);
+      const imgUrl = escapeAttr(getCloudinaryUrl(item.img, { width: 120, height: 120, crop: 'fill' }));
+      return `<div class="cart-item" data-cart-id="${itemId}">
+        <img src="${imgUrl}" alt="${name}" class="cart-item-img">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${name}</div>
+          <div class="cart-item-price">$${item.price.toLocaleString('es-MX')} MXN</div>
+          <div class="cart-item-qty">
+            <button class="qty-btn" data-action="decrease" data-id="${itemId}">&minus;</button>
+            <span>${item.qty}</span>
+            <button class="qty-btn" data-action="increase" data-id="${itemId}">+</button>
+          </div>
+        </div>
+        <button class="cart-item-remove" data-action="remove" data-id="${itemId}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+    }).join('');
   }
 
   if (cartTotal) {
@@ -139,7 +143,7 @@ export function initCart() {
 
       addToCart(id, name, price, img);
 
-      showToast(`¡"${name}" agregado al carrito con éxito!`);
+      showToast(`¡"${escapeHtml(name)}" agregado al carrito con éxito!`);
 
       this.classList.add('added');
       const originalHTML = this.innerHTML;

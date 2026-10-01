@@ -1,5 +1,6 @@
-import { AUTH_VINE_DECORATION } from './auth.controller.js';
+import { AUTH_VINE_DECORATION, getAuthUser } from './auth.controller.js';
 import { apiFetch } from '../config.js';
+import { escapeHtml, escapeAttr } from '../utils/dom.js';
 
 export function initWorkshops() {
   const overlay = document.getElementById('workshopOverlay');
@@ -40,19 +41,25 @@ export function initWorkshops() {
             const date = new Date(ws.scheduledDate);
             const dateStr = date.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
             const timeStr = date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-            const badgeClass = ws.modality === 'Online' ? 'workshop-badge--online' : '';
-            const agendaHtml = ws.agenda && ws.agenda.length ? ws.agenda.map(item => `<li>${item}</li>`).join('') : '';
-            
+            const modality = escapeHtml(ws.modality || 'Presencial');
+            const badgeClass = modality === 'Online' ? 'workshop-badge--online' : '';
+            const agendaHtml = ws.agenda && ws.agenda.length
+              ? ws.agenda.map(item => `<li>${escapeHtml(item)}</li>`).join('')
+              : '';
+            const title = escapeHtml(ws.title);
+            const description = escapeHtml(ws.description || '');
+            const imageUrl = escapeAttr(ws.imageUrl || 'https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_800,h_600/Huerto');
+
             // Text for the button depending on the price
             const isFree = !ws.price || Number(ws.price) === 0;
-            const buttonText = isFree ? 'Registrarse' : `Reservar Lugar - $${ws.price}`;
+            const priceText = escapeHtml(isFree ? 'Registrarse' : `Reservar Lugar - $${ws.price}`);
 
             const article = document.createElement('article');
             article.className = 'workshop-card';
             article.innerHTML = `
               <div class="workshop-img">
-                <img src="${ws.imageUrl || 'https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_800,h_600/Huerto'}" alt="${ws.title}" loading="lazy">
-                <span class="workshop-badge ${badgeClass}">${ws.modality}</span>
+                <img src="${imageUrl}" alt="${title}" loading="lazy">
+                <span class="workshop-badge ${badgeClass}">${modality}</span>
               </div>
               <div class="workshop-body">
                 <div class="workshop-date">
@@ -62,13 +69,13 @@ export function initWorkshops() {
                     <line x1="8" y1="2" x2="8" y2="6" />
                     <line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
-                  ${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)} · ${timeStr}
+                  ${escapeHtml(dateStr.charAt(0).toUpperCase() + dateStr.slice(1))} · ${escapeHtml(timeStr)}
                 </div>
-                <h3 class="workshop-title">${ws.title}</h3>
-                <p class="workshop-desc">${ws.description || ''}</p>
+                <h3 class="workshop-title">${title}</h3>
+                <p class="workshop-desc">${description}</p>
                 <ul class="workshop-agenda">${agendaHtml}</ul>
-                <button class="btn btn-terracotta btn-register-workshop" data-id="${ws.id}" data-workshop="${ws.title}" style="width: 100%; justify-content: center;">
-                  ${buttonText}
+                <button class="btn btn-terracotta btn-register-workshop" data-id="${escapeAttr(ws.id)}" data-workshop="${title}" style="width: 100%; justify-content: center;">
+                  ${priceText}
                 </button>
               </div>
             `;
@@ -96,15 +103,19 @@ export function initWorkshops() {
           pastWorkshops.forEach(ws => {
             const date = new Date(ws.scheduledDate);
             const dateStr = date.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
-            
+            const title = escapeHtml(ws.title);
+            const modality = escapeHtml(ws.modality || 'Presencial');
+            const description = escapeHtml(ws.description || '');
+            const imageUrl = escapeAttr(ws.imageUrl || 'https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_800,h_600/Huerto');
+
             const div = document.createElement('div');
             div.className = 'past-card';
             div.innerHTML = `
-              <img src="${ws.imageUrl || 'https://res.cloudinary.com/usn9paiw/image/upload/f_auto,q_auto,c_fill,w_800,h_600/Huerto'}" alt="${ws.title}" loading="lazy">
+              <img src="${imageUrl}" alt="${title}" loading="lazy">
               <div class="past-card-body">
-                <div class="past-card-title">${ws.title}</div>
-                <div class="past-card-meta">${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)} · ${ws.modality}</div>
-                <p style="font-size: 0.88rem; color: var(--color-gray-600); line-height: 1.5;">${ws.description || ''}</p>
+                <div class="past-card-title">${title}</div>
+                <div class="past-card-meta">${escapeHtml(dateStr.charAt(0).toUpperCase() + dateStr.slice(1))} · ${modality}</div>
+                <p style="font-size: 0.88rem; color: var(--color-gray-600); line-height: 1.5;">${description}</p>
               </div>
             `;
             pastGrid.appendChild(div);
@@ -134,14 +145,37 @@ export function initWorkshops() {
       // Cancel the fallback empty-state timeout since data already loaded
       if (pastGridEmptyTimeout) clearTimeout(pastGridEmptyTimeout);
 
+      const guestFields = document.getElementById('workshopGuestFields');
+      const loggedInMessage = document.getElementById('workshopLoggedInMessage');
+      const loggedInDetails = document.getElementById('workshopLoggedInDetails');
+
+      const updateWorkshopModalForAuth = () => {
+        const user = getAuthUser();
+        const token = localStorage.getItem('honatu_token');
+        const isLoggedIn = Boolean(token && user?.email);
+
+        if (isLoggedIn) {
+          if (guestFields) guestFields.style.display = 'none';
+          if (loggedInMessage) {
+            loggedInMessage.style.display = 'block';
+            const displayName = user.fullName || user.name || user.email.split('@')[0];
+            loggedInDetails.textContent = `${displayName} (${user.email})`;
+          }
+        } else {
+          if (guestFields) guestFields.style.display = 'block';
+          if (loggedInMessage) loggedInMessage.style.display = 'none';
+        }
+      };
+
       // Bind events to the newly created buttons
       document.querySelectorAll('.btn-register-workshop').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const title = btn.getAttribute('data-workshop');
           const wsTitle = title || 'Taller Honatu';
-          currentWorkshopId = e.target.getAttribute('data-id');
-          
+          currentWorkshopId = btn.getAttribute('data-id') || e.target.getAttribute('data-id');
+
           if(selectedName) selectedName.textContent = wsTitle;
+          updateWorkshopModalForAuth();
           if(overlay) overlay.classList.add('active');
           if(modal) {
             modal.classList.remove('vines-grown');
@@ -243,8 +277,7 @@ export function initWorkshops() {
     e.preventDefault();
 
     if (!currentWorkshopId) {
-      if (window.showToast) window.showToast('Error: No se pudo identificar el taller.', 'error');
-      else alert('Error: No se pudo identificar el taller.');
+      window.showToast('Error: No se pudo identificar el taller.', 'error');
       return;
     }
 
@@ -255,47 +288,37 @@ export function initWorkshops() {
       submitBtn.innerHTML = 'Procesando...';
     }
 
-    const name = document.getElementById('wsName').value;
-    const email = document.getElementById('wsEmail').value;
-    const phone = document.getElementById('wsPhone').value;
+    const token = localStorage.getItem('honatu_token');
+    const user = getAuthUser();
+    const isLoggedIn = Boolean(token && user?.email);
+
+    const payload = { workshopId: currentWorkshopId };
+    if (!isLoggedIn) {
+      payload.guestName = document.getElementById('wsName').value.trim();
+      payload.guestEmail = document.getElementById('wsEmail').value.trim();
+      payload.guestPhone = document.getElementById('wsPhone')?.value.trim() || '';
+    }
 
     try {
       const response = await apiFetch('/api/workshops/enroll', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          workshopId: currentWorkshopId,
-          guestName: name,
-          guestEmail: email,
-          guestPhone: phone
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
 
       if (response.ok) {
         closeModal();
-        if (window.showToast) {
-          window.showToast('¡Te has registrado con éxito! Te contactaremos pronto.');
-        } else {
-          alert('¡Te has registrado con éxito!');
-        }
+        window.showToast('¡Te has registrado con éxito! Te contactaremos pronto.');
         form.reset();
       } else {
-        if (window.showToast) {
-          window.showToast(data.message || 'Error al registrar', 'error');
-        } else {
-          alert(data.message || 'Error al registrar');
-        }
+        window.showToast(data.message || 'Error al registrar', 'error');
       }
 
     } catch (error) {
       console.error('Error en inscripción:', error);
-      if (window.showToast) {
-        window.showToast('Error de red al intentar registrarse.', 'error');
-      } else {
-        alert('Error de red al intentar registrarse.');
-      }
+      window.showToast('Error de red al intentar registrarse.', 'error');
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
