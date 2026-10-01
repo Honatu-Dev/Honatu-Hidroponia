@@ -327,28 +327,6 @@
                 </svg>
                 Mis Talleres
               </button>
-              <button class="account-nav-btn" data-tab="tab-orders">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                  <line x1="3" y1="6" x2="21" y2="6" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
-                Mis Pedidos
-              </button>
-              <button class="account-nav-btn" data-tab="tab-addresses">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                Direcciones de Envío
-              </button>
-              <button class="account-nav-btn" data-tab="tab-security">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                Seguridad
-              </button>
               <button id="logoutBtn" class="account-nav-btn" style="color: var(--color-terracotta); margin-top: 16px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-terracotta)"
                   stroke-width="2">
@@ -403,94 +381,6 @@
               <div id="myWorkshopsList">
                 <p style="color: var(--color-gray-500); font-size: 0.95rem;">Cargando tus inscripciones...</p>
               </div>
-            </div>
-
-            <!-- TAB 2: MIS PEDIDOS -->
-            <div id="tab-orders" class="account-tab-content">
-              <h2 class="account-title">Mis Pedidos</h2>
-              <p class="account-subtitle">Consulta el historial y estado de tus compras en Honatu.</p>
-
-              <div class="order-card">
-                <div class="order-header">
-                  <div>
-                    <span class="order-id">Orden #HON-9482</span>
-                    <span style="font-size: 0.8rem; color: var(--color-gray-500); margin-left: 8px;">24 de Julio
-                      2024</span>
-                  </div>
-                  <span class="badge-status">Entregado</span>
-                </div>
-                <ul class="order-items-list">
-                  <li>• 1x Solución Nutritiva A+B (1 L)</li>
-                  <li>• 2x Fibra de Coco Premium (10 L)</li>
-                </ul>
-                <div class="order-footer">
-                  <span>Total Pagado: $887 MXN</span>
-                  <a href="#" style="color: var(--color-forest); text-decoration: underline; font-size: 0.85rem;">Ver
-                    Detalle</a>
-                </div>
-              </div>
-
-              <div class="order-card">
-                <div class="order-header">
-                  <div>
-                    <span class="order-id">Orden #HON-8210</span>
-                    <span style="font-size: 0.8rem; color: var(--color-gray-500); margin-left: 8px;">10 de Junio
-                      2024</span>
-                  </div>
-                  <span class="badge-status">Entregado</span>
-                </div>
-                <ul class="order-items-list">
-                  <li>• 1x Medidor pH/EC Digital de Precisión</li>
-                </ul>
-                <div class="order-footer">
-                  <span>Total Pagado: $599 MXN</span>
-                  <a href="#" style="color: var(--color-forest); text-decoration: underline; font-size: 0.85rem;">Ver
-                    Detalle</a>
-                </div>
-              </div>
-            </div>
-
-            <!-- TAB 3: DIRECCIONES -->
-            <div id="tab-addresses" class="account-tab-content">
-              <h2 class="account-title">Direcciones de Envío</h2>
-              <p class="account-subtitle">Gestiona las ubicaciones donde deseas recibir tus pedidos.</p>
-
-              <div class="address-card">
-                <span class="address-badge">Dirección Predeterminada</span>
-                <h4 style="font-size: 1.05rem; color: var(--color-earth); margin-bottom: 6px;">Carlos Mendoza</h4>
-                <p style="font-size: 0.9rem; color: var(--color-gray-600); line-height: 1.5; margin-bottom: 12px;">
-                  Av. Universidad 120, Col. Centro<br>
-                  Santiago de Querétaro, Qro. CP 76000<br>
-                  Tel: +52 442 987 6543
-                </p>
-                <button class="btn btn-secondary btn-sm" style="font-size: 0.8rem; padding: 4px 14px;">Editar
-                  Dirección</button>
-              </div>
-            </div>
-
-            <!-- TAB 4: SEGURIDAD -->
-            <div id="tab-security" class="account-tab-content">
-              <h2 class="account-title">Seguridad</h2>
-              <p class="account-subtitle">Mantén tu cuenta protegida cambiando tu contraseña periódicamente.</p>
-
-              <form id="securityForm" class="login-form">
-                <div class="form-group">
-                  <label class="form-label" for="currPass">Contraseña Actual</label>
-                  <input type="password" id="currPass" class="form-input" required>
-                </div>
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label class="form-label" for="newPass">Nueva Contraseña</label>
-                    <input type="password" id="newPass" class="form-input" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="confirmPass">Confirmar Nueva Contraseña</label>
-                    <input type="password" id="confirmPass" class="form-input" required>
-                  </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Actualizar Contraseña
-                  &rarr;</button>
-              </form>
             </div>
 
           </div>
@@ -710,45 +600,7 @@
         });
       }
 
-      // 5. Cambio de contraseña
-      const securityForm = document.getElementById('securityForm');
-      if (securityForm) {
-        securityForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const currentPassword = document.getElementById('currPass').value;
-          const newPassword = document.getElementById('newPass').value;
-          const confirmPassword = document.getElementById('confirmPass').value;
-
-          if (newPassword !== confirmPassword) {
-            if (window.showToast) window.showToast("Las nuevas contraseñas no coinciden.", "error");
-            else alert("Las nuevas contraseñas no coinciden.");
-            return;
-          }
-
-          try {
-            const res = await apiFetch('/api/auth/change-password', {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ currentPassword, newPassword })
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-              if (window.showToast) window.showToast("¡Contraseña actualizada exitosamente!");
-              else alert("Contraseña actualizada exitosamente.");
-              securityForm.reset();
-            } else {
-              if (window.showToast) window.showToast(data.message || "Error al actualizar contraseña", "error");
-              else alert(data.message);
-            }
-          } catch (err) {
-            console.error(err);
-            if (window.showToast) window.showToast("Error de conexión al cambiar contraseña", "error");
-          }
-        });
-      }
-
-      // 6. Cerrar Sesión
+      // 5. Cerrar Sesión
       const logoutBtn = document.getElementById('logoutBtn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {

@@ -248,6 +248,13 @@ export function initWorkshops() {
       return;
     }
 
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Procesando...';
+    }
+
     const name = document.getElementById('wsName').value;
     const email = document.getElementById('wsEmail').value;
     const phone = document.getElementById('wsPhone').value;
@@ -288,6 +295,11 @@ export function initWorkshops() {
         window.showToast('Error de red al intentar registrarse.', 'error');
       } else {
         alert('Error de red al intentar registrarse.');
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
       }
     }
   });

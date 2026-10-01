@@ -49,3 +49,4 @@ Thumbs.db
 .cache/
 .vite/
 /schema.sql
+backend/schema.sql
