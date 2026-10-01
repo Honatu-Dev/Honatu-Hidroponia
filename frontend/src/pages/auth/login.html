@@ -355,6 +355,7 @@
   <!-- Login Logic Script -->
   <script type="module">
     import { setString, setItem, StorageKeys } from '../../js/middleware/storage.middleware.js';
+    import { apiFetch } from '../../js/config.js';
 
     document.getElementById('standaloneLoginForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -368,7 +369,7 @@
       const password = document.getElementById('loginPass').value.trim();
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
+        const response = await apiFetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })

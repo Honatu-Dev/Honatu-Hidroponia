@@ -11,9 +11,9 @@ import { initAdminServices } from './controllers/admin-services.controller.js';
 import { initAdminGuides } from './controllers/admin-guides.controller.js';
 import { initAdminFrontend } from './controllers/admin-frontend.controller.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // 1. Guard Admin Route
-  const isAuthorized = requireAdminAuth(true);
+  const isAuthorized = await requireAdminAuth(true);
   if (!isAuthorized) return;
 
   // 2. Display User Details

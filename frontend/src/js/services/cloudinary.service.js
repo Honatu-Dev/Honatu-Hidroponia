@@ -13,9 +13,8 @@
  * Cloudinary configuration loaded from Vite environment variables (import.meta.env)
  */
 export const cloudinaryConfig = {
-  cloudName: 'usn9paiw',
-  apiKey: '933381184925323',
-  uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'honatu_preset',
+  cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'usn9paiw',
+  uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
   folder: import.meta.env.VITE_CLOUDINARY_FOLDER || 'Honatu',
 
   // Base delivery URL
@@ -29,11 +28,11 @@ export const cloudinaryConfig = {
   },
 
   /**
-   * Check if Cloudinary is properly configured in the environment
+   * Check if Cloudinary delivery is properly configured in the environment
    * @returns {boolean}
    */
   isConfigured() {
-    return true;
+    return Boolean(this.cloudName);
   }
 };
 

@@ -17,7 +17,7 @@ export const requireAuth = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_honatu_123');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // { id, email, role }
     next();
   } catch (error) {
@@ -31,7 +31,7 @@ export const optionalAuth = (req, res, next) => {
   const token = extractToken(req);
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_honatu_123');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded;
     } catch (error) {
       console.warn('Optional auth token invalid, proceeding as guest');

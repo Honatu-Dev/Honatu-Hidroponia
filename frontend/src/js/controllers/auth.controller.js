@@ -6,6 +6,7 @@
 import logoImg from '../../assets/logo/Logo.png';
 import { getItem, setItem, removeItem, getString, setString, StorageKeys } from '../middleware/storage.middleware.js';
 import { showToast } from '../middleware/toast.middleware.js';
+import { apiFetch } from '../config.js';
 
 let isAuthenticated = getString(StorageKeys.AUTH) === 'true';
 let authRole = getString(StorageKeys.AUTH_ROLE) || 'CLIENT';
@@ -101,11 +102,7 @@ export async function verifySession() {
   }
 
   try {
-    const response = await fetch('http://localhost:5000/api/auth/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    const response = await apiFetch('/api/auth/me');
 
     if (response.ok) {
       const data = await response.json();
@@ -134,18 +131,32 @@ export async function verifySession() {
   return cachedUser;
 }
 
-export function requireAdminAuth(redirectToLogin = true) {
-  if (isAdmin()) {
-    return true;
+export async function requireAdminAuth(redirectToLogin = true) {
+  const token = localStorage.getItem('honatu_token');
+  if (!token) {
+    if (redirectToLogin) {
+      showToast("Acceso restringido: Se requieren permisos de Administrador.");
+      window.location.href = getLoginUrl();
+    }
+    return false;
   }
 
-  if (redirectToLogin) {
-    showToast("Acceso restringido: Se requieren permisos de Administrador.");
-    const loginUrl = getLoginUrl();
-    setTimeout(() => {
-      window.location.href = loginUrl;
-    }, 600);
+  try {
+    const response = await apiFetch('/api/auth/me');
+    if (response.ok) {
+      const data = await response.json();
+      if (data.user?.role === 'ADMIN') {
+        setString(StorageKeys.AUTH, 'true');
+        setString(StorageKeys.AUTH_ROLE, data.user.role);
+        setItem(StorageKeys.AUTH_USER, data.user);
+        return true;
+      }
+    }
+  } catch (error) {
+    console.error('Admin auth verification failed:', error);
   }
+
+  logout(getLoginUrl());
   return false;
 }
 
@@ -284,10 +295,6 @@ function ensureAuthModalDOM() {
             <input type="password" id="modalLoginPassword" class="form-input" placeholder="Tu contraseña" autocomplete="current-password">
           </div>
 
-          <!-- <div style="background: rgba(35, 78, 40, 0.06); border: 1px dashed var(--color-sage); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 14px; font-size: 0.78rem; color: var(--color-forest);">
-            <strong>Acceso de prueba:</strong> Dejar vacío para entrar como <em>Cliente</em>, o escribir <code>admin</code> y <code>contraseña</code> para el <em>Panel Admin</em>.
-          </div> -->
-
           <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
             Iniciar Sesión &rarr;
           </button>
@@ -372,7 +379,7 @@ function bindModalEvents() {
     const passVal = (document.getElementById('modalLoginPassword')?.value || '').trim();
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userVal, password: passVal })
@@ -407,7 +414,7 @@ function bindModalEvents() {
     const password = document.getElementById('modalRegPassword')?.value || '';
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await apiFetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fullName: name, email, password })
@@ -461,26 +468,6 @@ function handleAuthSuccess({ role = 'CLIENT', name = 'Cultivador', email = 'clie
       }, 500);
     }
   }
-}
-
-export function loginAsClient() {
-  handleAuthSuccess({
-    role: 'CLIENT',
-    name: 'Cultivador Honatu',
-    email: 'cliente@honatu.com',
-    message: "Sesión iniciada como Cliente (Modo de Prueba).",
-    redirectUrl: getClientHomeUrl()
-  });
-}
-
-export function loginAsAdmin() {
-  handleAuthSuccess({
-    role: 'ADMIN',
-    name: 'Administrador Honatu',
-    email: 'admin@honatu.com',
-    message: "Sesión iniciada como Administrador (Modo de Prueba).",
-    redirectUrl: getAdminUrl()
-  });
 }
 
 export function openLoginModal(options = {}) {
@@ -582,8 +569,6 @@ window.getIsAuthenticated = getIsAuthenticated;
 window.getAuthRole = getAuthRole;
 window.getAuthUser = getAuthUser;
 window.isAdmin = isAdmin;
-window.loginAsClient = loginAsClient;
-window.loginAsAdmin = loginAsAdmin;
 window.logout = logout;
 window.verifySession = verifySession;
 window.updateNavbarUserState = updateNavbarUserState;
