@@ -549,6 +549,7 @@
 
   <script type="module">
     import { getAuthUser, isAdmin, logout, verifySession } from '../../js/controllers/auth.controller.js';
+    import { apiFetch } from '../../js/config.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
       const token = localStorage.getItem('honatu_token');
@@ -560,9 +561,7 @@
       // 1. Obtener y poblar datos del usuario desde /api/auth/me
       async function loadProfile() {
         try {
-          const res = await fetch('http://localhost:5000/api/auth/me', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const res = await apiFetch('/api/auth/me');
 
           if (!res.ok) {
             logout('login.html', false);
@@ -598,9 +597,7 @@
         if (!container) return;
 
         try {
-          const res = await fetch('http://localhost:5000/api/workshops/my-enrollments', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const res = await apiFetch('/api/workshops/my-enrollments');
 
           if (!res.ok) {
             container.innerHTML = '<p style="color: var(--color-gray-500);">No se pudieron cargar tus talleres.</p>';
@@ -686,12 +683,9 @@
           if (submitBtn) submitBtn.disabled = true;
 
           try {
-            const res = await fetch('http://localhost:5000/api/auth/profile', {
+            const res = await apiFetch('/api/auth/profile', {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ fullName, phone, shippingAddress })
             });
 
@@ -732,12 +726,9 @@
           }
 
           try {
-            const res = await fetch('http://localhost:5000/api/auth/change-password', {
+            const res = await apiFetch('/api/auth/change-password', {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ currentPassword, newPassword })
             });
 
