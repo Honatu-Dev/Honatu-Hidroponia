@@ -390,10 +390,11 @@ function bindModalEvents() {
       if (response.ok) {
         // Save the token for future API calls
         localStorage.setItem('honatu_token', data.token);
-        
+        const displayName = data.user.fullName || data.user.name || data.user.email?.split('@')[0] || 'Cultivador';
+
         handleAuthSuccess({
           role: data.user.role,
-          name: data.user.name,
+          name: displayName,
           email: data.user.email,
           message: `¡Bienvenido(a) de nuevo! Sesión iniciada.`
         });
@@ -425,12 +426,13 @@ function bindModalEvents() {
       if (response.ok) {
         // Automatically log them in after registration
         localStorage.setItem('honatu_token', data.token);
-        
+        const displayName = data.user.fullName || data.user.name || data.user.email?.split('@')[0] || 'Cultivador';
+
         handleAuthSuccess({
           role: data.user.role,
-          name: data.user.name,
+          name: displayName,
           email: data.user.email,
-          message: `¡Bienvenido(a), ${data.user.name}! Tu cuenta ha sido creada.`
+          message: `¡Bienvenido(a), ${displayName}! Tu cuenta ha sido creada.`
         });
       } else {
         if (window.showToast) window.showToast(data.message || 'Error al crear cuenta', 'error');

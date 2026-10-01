@@ -53,6 +53,7 @@ export const register = async (req, res) => {
         id: newUser.id,
         email: newUser.email,
         role: newUser.role,
+        name: fullName,
         fullName
       }
     });

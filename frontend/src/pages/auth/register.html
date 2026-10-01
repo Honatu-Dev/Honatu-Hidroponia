@@ -395,10 +395,14 @@
         }
 
         // Si es exitoso, guardar Token y User Info
+        const user = {
+          ...data.user,
+          name: data.user.fullName || data.user.name || data.user.email?.split('@')[0] || 'Cultivador'
+        };
         setString(StorageKeys.AUTH, 'true');
         setString('honatu_token', data.token); // Custom token key
-        setString(StorageKeys.AUTH_ROLE, data.user.role);
-        setItem(StorageKeys.AUTH_USER, data.user);
+        setString(StorageKeys.AUTH_ROLE, user.role);
+        setItem(StorageKeys.AUTH_USER, user);
         
         alert("¡Cuenta creada exitosamente!");
         window.location.href = 'account.html';
