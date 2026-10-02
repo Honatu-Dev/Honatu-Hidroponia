@@ -32,25 +32,25 @@ ProductVariant.hasMany(CartItem, { foreignKey: 'productVariantId', onDelete: 'CA
 CartItem.belongsTo(ProductVariant, { foreignKey: 'productVariantId' });
 
 // 4. Orders
-User.hasMany(Order, { foreignKey: 'userId' });
-Order.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Order, { foreignKey: 'userId', onDelete: 'RESTRICT' });
+Order.belongsTo(User, { foreignKey: 'userId', onDelete: 'RESTRICT' });
 
 Order.hasMany(OrderItem, { foreignKey: 'orderId', onDelete: 'CASCADE' });
-OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
+OrderItem.belongsTo(Order, { foreignKey: 'orderId', onDelete: 'CASCADE' });
 
-ProductVariant.hasMany(OrderItem, { foreignKey: 'productVariantId' });
-OrderItem.belongsTo(ProductVariant, { foreignKey: 'productVariantId' });
+ProductVariant.hasMany(OrderItem, { foreignKey: 'productVariantId', onDelete: 'RESTRICT' });
+OrderItem.belongsTo(ProductVariant, { foreignKey: 'productVariantId', onDelete: 'RESTRICT' });
 
 // 5. Services
-User.hasMany(ServiceRequest, { foreignKey: 'userId' });
-ServiceRequest.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(ServiceRequest, { foreignKey: 'userId', onDelete: 'SET NULL' });
+ServiceRequest.belongsTo(User, { foreignKey: 'userId', onDelete: 'SET NULL' });
 
 // 6. Workshops
-User.hasMany(WorkshopEnrollment, { foreignKey: 'userId' });
-WorkshopEnrollment.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(WorkshopEnrollment, { foreignKey: 'userId', onDelete: 'SET NULL' });
+WorkshopEnrollment.belongsTo(User, { foreignKey: 'userId', onDelete: 'SET NULL' });
 
-Workshop.hasMany(WorkshopEnrollment, { foreignKey: 'workshopId' });
-WorkshopEnrollment.belongsTo(Workshop, { foreignKey: 'workshopId' });
+Workshop.hasMany(WorkshopEnrollment, { foreignKey: 'workshopId', onDelete: 'CASCADE' });
+WorkshopEnrollment.belongsTo(Workshop, { foreignKey: 'workshopId', onDelete: 'CASCADE' });
 
 export {
   sequelize,

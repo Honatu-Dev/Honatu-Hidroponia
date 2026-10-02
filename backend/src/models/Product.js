@@ -6,6 +6,7 @@ const Product = sequelize.define('Product', {
   name: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.TEXT },
   category: { type: DataTypes.STRING },
+  imageUrl: { type: DataTypes.STRING },
   isActive: { type: DataTypes.BOOLEAN, defaultValue: true }
 }, { timestamps: true });
 
