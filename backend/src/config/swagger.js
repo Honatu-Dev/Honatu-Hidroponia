@@ -363,9 +363,26 @@ export const setupSwagger = (app) => {
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec, {
       customSiteTitle: 'Honatu Hidroponía - Documentación API',
+      customfavIcon: '/assets/logo.png',
       customCss: `
         .swagger-ui .topbar { background-color: #1b4332; }
-        .swagger-ui .topbar .topbar-wrapper a span { font-weight: bold; }
+        .swagger-ui .topbar .topbar-wrapper a span { display: none; }
+        .swagger-ui .topbar .topbar-wrapper a svg,
+        .swagger-ui .topbar .topbar-wrapper a img { display: none; }
+        .swagger-ui .topbar .topbar-wrapper a {
+          background-image: url('/assets/logo.png');
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: left center;
+          width: 200px;
+          height: 40px;
+          display: block;
+        }
+        /* Ocultar cualquier otro elemento en la barra superior (como el icono de foco / no molestar) */
+        .swagger-ui .topbar .topbar-wrapper > *:not(a) { display: none !important; }
+        .swagger-ui .topbar button,
+        .swagger-ui .topbar svg:not(.topbar-wrapper a svg),
+        .swagger-ui .topbar img:not(.topbar-wrapper a img) { display: none !important; }
       `,
     })
   );
