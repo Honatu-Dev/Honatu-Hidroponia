@@ -393,3 +393,9 @@
   }
 }
 
+@media (max-width: 480px) {
+  .shop-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

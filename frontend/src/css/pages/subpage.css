@@ -224,14 +224,34 @@
 @media (max-width: 640px) {
   .education-grid {
     grid-template-columns: 1fr;
+    gap: var(--space-lg);
   }
+
   .card-large {
     grid-column: span 1;
     grid-template-columns: 1fr;
   }
+
+  .card-copy {
+    padding: var(--space-lg);
+  }
+
+  .card-large .card-copy {
+    padding: var(--space-xl);
+  }
+
   .subpage-hero,
   .hero {
     padding: calc(var(--nav-height, 84px) + 24px) var(--space-md) var(--space-2xl);
+  }
+
+  .education-section,
+  .map-section,
+  .focus-section,
+  .subpage-section {
+    width: 100%;
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
   }
 }
 

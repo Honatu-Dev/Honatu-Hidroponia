@@ -182,6 +182,12 @@ button {
   max-width: var(--container-narrow);
 }
 
+@media (max-width: 640px) {
+  .container {
+    padding: 0 var(--space-md);
+  }
+}
+
 /* ==========================================
    UTILITY: Scroll-triggered Animations
    ========================================== */

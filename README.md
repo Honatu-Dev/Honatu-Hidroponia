@@ -91,6 +91,7 @@ For in-depth technical documentation, refer to the dedicated guides in the [`doc
 - [API Reference](./docs/api.md): Complete endpoint listings, payload contracts, authentication headers, and error codes.
 - [Database & Data Models](./docs/database.md): Schema design, entity descriptions, relationship mappings, and foreign key rules.
 - [Local Setup Guide](./docs/setup-guide.md): Comprehensive developer onboarding, database provisioning, and build instructions.
+- [Production Deployment](./docs/deployment.md): Ubuntu/Debian deployment with PostgreSQL, PM2, Nginx, and HTTPS.
 
 ---
 

@@ -8,7 +8,7 @@
   <meta name="description" content="Servicios integrales de hidroponía: asesoría técnica, venta de insumos, construcción de invernaderos y talleres de capacitación.">
 
   <link rel="stylesheet" href="../../css/main.css">
-  <link rel="stylesheet" href="../../css/pages/home.css">
+  <link rel="stylesheet" href="../../css/pages/subpage.css">
   <link rel="icon" href="../../assets/logo/Logo.png" type="image/png">
 
   <script type="module" src="../../js/app.js"></script>
@@ -58,7 +58,7 @@
               </select>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-md);">
               <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
                 <label for="nombre" style="font-weight: 600; color: var(--color-forest);">Nombre Completo *</label>
                 <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre y apellido"
