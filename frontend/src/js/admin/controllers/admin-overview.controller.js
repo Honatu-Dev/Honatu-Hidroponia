@@ -3,19 +3,24 @@
    KPI calculations & Chart.js Visualizations
    ============================================ */
 
-import { getAdminProducts, getAdminWorkshops, getAdminServices } from '../data/admin-mock-data.js';
+import { adminCache, loadProducts, loadWorkshops, loadServices, loadOrders } from '../data/admin-api.js';
 
 let chartInstances = {};
 
 export function initAdminOverview() {
-  renderKPICards();
-  renderOverviewCharts();
+  Promise.all([loadProducts(), loadWorkshops(), loadServices(), loadOrders()])
+    .then(() => {
+      renderKPICards();
+      renderOverviewCharts();
+    })
+    .catch(err => console.error('Error cargando métricas del admin:', err));
 }
 
 export function renderKPICards() {
-  const products = getAdminProducts();
-  const workshops = getAdminWorkshops();
-  const services = getAdminServices();
+  const products = adminCache.products;
+  const workshops = adminCache.workshops;
+  const services = adminCache.services;
+  const orders = adminCache.orders;
 
   // 1. Calculate Workshop Stats
   let totalWorkshopSlots = 0;
@@ -47,9 +52,11 @@ export function renderKPICards() {
     });
   });
 
-  // Estimated Product Monthly Sales
-  const estimatedProductSales = 48650;
-  const totalRevenue = estimatedProductSales + workshopRevenue;
+  // Ingresos reales por pedidos (no cancelados)
+  const orderRevenue = orders
+    .filter(o => o.status !== 'CANCELLED')
+    .reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
+  const totalRevenue = orderRevenue + workshopRevenue;
 
   // 3. Service Requests Stats
   const pendingServices = services.filter(s => s.status === 'PENDING' || s.status === 'IN_REVIEW').length;
@@ -85,14 +92,32 @@ export function renderOverviewCharts() {
   // 1. Sales & Revenue Trend Chart (Area Line)
   const ctxSales = document.getElementById('chartSalesTrend')?.getContext('2d');
   if (ctxSales) {
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: monthNames[d.getMonth()] });
+    }
+
+    const revenueByMonth = months.map(m =>
+      adminCache.orders
+        .filter(o => {
+          if (o.status === 'CANCELLED') return false;
+          const d = new Date(o.createdAt);
+          return `${d.getFullYear()}-${d.getMonth()}` === m.key;
+        })
+        .reduce((sum, o) => sum + Number(o.totalAmount || 0), 0)
+    );
+
     chartInstances.sales = new ChartLib(ctxSales, {
       type: 'line',
       data: {
-        labels: ['Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago (Actual)'],
+        labels: months.map(m => m.label),
         datasets: [
           {
-            label: 'Ingresos Totales ($)',
-            data: [32000, 38500, 44200, 51000, 58400, 67150],
+            label: 'Ingresos por Pedidos ($)',
+            data: revenueByMonth,
             borderColor: '#234E28',
             backgroundColor: 'rgba(35, 78, 40, 0.12)',
             fill: true,
@@ -103,7 +128,20 @@ export function renderOverviewCharts() {
           },
           {
             label: 'Talleres & Cursos ($)',
-            data: [12000, 15000, 16500, 21000, 22000, 27400],
+            data: (() => {
+              const workshopsById = new Map(adminCache.workshops.map(w => [w.id, w]));
+              return months.map(m =>
+                adminCache.enrollments
+                  .filter(e => {
+                    if (e.paymentStatus !== 'PAID') return false;
+                    const w = workshopsById.get(e.workshopId);
+                    if (!w || !w.date) return false;
+                    const d = new Date(w.date);
+                    return `${d.getFullYear()}-${d.getMonth()}` === m.key;
+                  })
+                  .reduce((sum, e) => sum + (e.amount || 0), 0)
+              );
+            })(),
             borderColor: '#B87333',
             backgroundColor: 'rgba(184, 115, 51, 0.08)',
             fill: true,
@@ -143,13 +181,25 @@ export function renderOverviewCharts() {
   // 2. Sales by Product Category (Doughnut)
   const ctxCategory = document.getElementById('chartCategorySales')?.getContext('2d');
   if (ctxCategory) {
+    // Ventas por categoría a partir de los OrderItems reales
+    const catTotals = {};
+    adminCache.orders.forEach(o => {
+      (o.OrderItems || []).forEach(item => {
+        const cat = item.ProductVariant?.Product?.category || 'Otros';
+        catTotals[cat] = (catTotals[cat] || 0) + (item.quantity || 0);
+      });
+    });
+    const catEntries = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+    const catLabels = catEntries.length ? catEntries.map(([c]) => c) : ['Sin ventas'];
+    const catData = catEntries.length ? catEntries.map(([, n]) => n) : [1];
+
     chartInstances.category = new ChartLib(ctxCategory, {
       type: 'doughnut',
       data: {
-        labels: ['Nutrientes A+B', 'Sistemas NFT', 'Sustratos & Perlita', 'Instrumentación'],
+        labels: catLabels,
         datasets: [{
-          data: [42, 28, 18, 12],
-          backgroundColor: ['#234E28', '#5E8254', '#B87333', '#CAD7BA'],
+          data: catData,
+          backgroundColor: ['#234E28', '#5E8254', '#B87333', '#CAD7BA', '#8FA98B', '#CF8A4A'],
           borderWidth: 2,
           borderColor: '#FFFFFF'
         }]
@@ -161,7 +211,7 @@ export function renderOverviewCharts() {
           legend: { position: 'right', labels: { boxWidth: 12, font: { family: 'Plus Jakarta Sans', size: 12 } } },
           tooltip: {
             callbacks: {
-              label: (item) => ` ${item.label}: ${item.raw}% de ventas`
+              label: (item) => ` ${item.label}: ${item.raw} unidades`
             }
           }
         },
@@ -173,7 +223,7 @@ export function renderOverviewCharts() {
   // 3. Workshops Capacity vs Enrolled (Bar)
   const ctxWorkshops = document.getElementById('chartWorkshops')?.getContext('2d');
   if (ctxWorkshops) {
-    const workshops = getAdminWorkshops();
+    const workshops = adminCache.workshops;
     const labels = workshops.map(w => w.title.length > 22 ? w.title.substring(0, 20) + '...' : w.title);
     const capacityData = workshops.map(w => w.maxCapacity);
     const registeredData = workshops.map(w => (w.registrations || []).length);
@@ -214,13 +264,16 @@ export function renderOverviewCharts() {
   // 4. Advisory & Greenhouse Requests Status
   const ctxServices = document.getElementById('chartServices')?.getContext('2d');
   if (ctxServices) {
+    const svc = adminCache.services;
+    const count = status => svc.filter(s => s.rawStatus === status).length;
+
     chartInstances.services = new ChartLib(ctxServices, {
       type: 'pie',
       data: {
-        labels: ['En Revisión', 'Pendientes', 'Aceptadas / Cotizadas'],
+        labels: ['En Revisión', 'Pendientes', 'Aceptadas', 'Completadas', 'Rechazadas'],
         datasets: [{
-          data: [1, 1, 1],
-          backgroundColor: ['#B87333', '#CF8A4A', '#234E28'],
+          data: [count('REVIEW'), count('PENDING'), count('ACCEPTED'), count('COMPLETED'), count('REJECTED')],
+          backgroundColor: ['#B87333', '#CF8A4A', '#234E28', '#5E8254', '#9E9E9E'],
           borderWidth: 2,
           borderColor: '#FFFFFF'
         }]

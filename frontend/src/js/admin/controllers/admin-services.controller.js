@@ -3,11 +3,25 @@
    Advisories, Greenhouse Construction & Quotes
    ============================================ */
 
-import { getAdminServices, saveAdminServices } from '../data/admin-mock-data.js';
+import { apiFetch } from '../../config.js';
+import { adminCache, loadServices } from '../data/admin-api.js';
 import { showToast } from '../../middleware/toast.middleware.js';
 
+const STATUS_LABELS = {
+  PENDING: 'Pendiente',
+  REVIEW: 'En Revisión',
+  ACCEPTED: 'Aceptada',
+  COMPLETED: 'Completada',
+  REJECTED: 'Rechazada'
+};
+
 export function initAdminServices() {
-  renderServicesTable();
+  loadServices()
+    .then(() => renderServicesTable())
+    .catch(err => {
+      console.error('Error cargando solicitudes:', err);
+      showToast('No se pudieron cargar las solicitudes del servidor.');
+    });
   bindServiceEvents();
 }
 
@@ -15,13 +29,23 @@ export function renderServicesTable() {
   const tbody = document.getElementById('adminServicesTableBody');
   if (!tbody) return;
 
-  const services = getAdminServices();
+  const services = adminCache.services;
+
+  if (services.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 32px; color: var(--color-gray-500);">
+          No hay solicitudes de servicio registradas todavía.
+        </td>
+      </tr>`;
+    return;
+  }
 
   tbody.innerHTML = services.map(s => `
     <tr>
       <td>
         <strong>${s.clientName}</strong>
-        <div style="font-size: 0.75rem; color: var(--color-gray-500);">${s.contactEmail} • ${s.contactPhone}</div>
+        <div style="font-size: 0.75rem; color: var(--color-gray-500);">${s.contactEmail} • ${s.contactPhone || 'Sin teléfono'}</div>
       </td>
       <td>
         <span class="status-pill" style="background: ${s.serviceType === 'CONSTRUCTION' ? 'rgba(184, 115, 51, 0.12)' : 'rgba(94, 130, 84, 0.14)'}; color: ${s.serviceType === 'CONSTRUCTION' ? 'var(--color-terracotta)' : 'var(--color-forest)'};">
@@ -31,13 +55,13 @@ export function renderServicesTable() {
       <td>${s.serviceTitle}</td>
       <td><span style="font-size: 0.8rem; color: var(--color-gray-500);">${s.requestedAt}</span></td>
       <td>
-        <span class="status-pill ${s.status === 'ACCEPTED' ? 'paid' : s.status === 'IN_REVIEW' ? 'pending' : 'draft'}">
-          ${s.status === 'ACCEPTED' ? '✓ Cotizado y Aceptado' : s.status === 'IN_REVIEW' ? 'En Revisión' : 'Pendiente'}
+        <span class="status-pill ${s.rawStatus === 'ACCEPTED' || s.rawStatus === 'COMPLETED' ? 'paid' : s.rawStatus === 'REVIEW' ? 'pending' : s.rawStatus === 'REJECTED' ? 'draft' : 'draft'}">
+          ${STATUS_LABELS[s.rawStatus] || 'Pendiente'}
         </span>
       </td>
       <td>
         <button type="button" class="btn-admin-pill btn-view-service" data-id="${s.id}">
-          Ver Detalle & Cotización
+          Ver Detalle
         </button>
       </td>
     </tr>
@@ -55,95 +79,69 @@ function bindServiceEvents() {
   document.getElementById('adminServicesTableBody')?.addEventListener('click', (e) => {
     const viewBtn = e.target.closest('.btn-view-service');
     if (viewBtn) {
-      const id = parseInt(viewBtn.dataset.id, 10);
-      openServiceDetailModal(id);
+      openServiceDetailModal(viewBtn.dataset.id);
     }
   });
 }
 
+async function setServiceStatus(id, status) {
+  const res = await apiFetch(`/api/service-requests/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status })
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message);
+}
+
 function openServiceDetailModal(serviceId) {
-  const services = getAdminServices();
-  const service = services.find(s => s.id === serviceId);
+  const service = adminCache.services.find(s => s.id === serviceId);
   if (!service) return;
 
   const modal = document.getElementById('serviceModal');
-  document.getElementById('serviceModalTitle').textContent = `Solicitud #${service.id}: ${service.clientName}`;
+  document.getElementById('serviceModalTitle').textContent = `Solicitud: ${service.clientName}`;
 
   const detailContainer = document.getElementById('serviceDetailContent');
   const d = service.details || {};
 
-  let detailHtml = `
+  detailContainer.innerHTML = `
     <div style="background: var(--color-stone-light); padding: 16px; border-radius: var(--radius-md); margin-bottom: 16px;">
       <h4 style="margin: 0 0 8px; color: var(--color-forest); font-family: var(--font-display);">${service.serviceTitle}</h4>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem;">
         <div><strong>Contacto:</strong> ${service.clientName}</div>
         <div><strong>Correo:</strong> ${service.contactEmail}</div>
-        <div><strong>Teléfono:</strong> ${service.contactPhone}</div>
+        <div><strong>Teléfono:</strong> ${service.contactPhone || 'N/D'}</div>
         <div><strong>Fecha:</strong> ${service.requestedAt}</div>
-        ${d.surfaceM2 ? `<div><strong>Superficie:</strong> ${d.surfaceM2} m²</div>` : ''}
-        ${d.targetCrop ? `<div><strong>Cultivo:</strong> ${d.targetCrop}</div>` : ''}
         ${d.location ? `<div><strong>Ubicación:</strong> ${d.location}</div>` : ''}
-        ${d.modality ? `<div><strong>Modalidad:</strong> ${d.modality}</div>` : ''}
       </div>
-      ${d.notes || d.problemDescription ? `
-        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--color-gray-200); font-size: 0.84rem;">
-          <strong>Notas / Diagnóstico:</strong> ${d.notes || d.problemDescription}
+      ${d.notes ? `
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--color-gray-200); font-size: 0.84rem; white-space: pre-line;">
+          <strong>Detalles:</strong> ${d.notes}
         </div>
       ` : ''}
     </div>
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 12px;">
+      <button type="button" class="btn btn-secondary btn-sm" data-status="REVIEW">Marcar En Revisión</button>
+      <button type="button" class="btn btn-primary btn-sm" data-status="ACCEPTED">Aceptar</button>
+      <button type="button" class="btn btn-primary btn-sm" data-status="COMPLETED">Completada</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-status="REJECTED" style="color: var(--color-terracotta);">Rechazar</button>
+    </div>
   `;
 
-  if (service.quote) {
-    const q = service.quote;
-    detailHtml += `
-      <div style="background: #FFFFFF; border: 1px solid var(--color-gray-200); padding: 16px; border-radius: var(--radius-md);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h4 style="margin: 0; color: var(--color-forest); font-family: var(--font-display);">Cotización Emitida</h4>
-          <span class="status-pill ${q.status === 'ACCEPTED' ? 'paid' : 'pending'}">${q.status}</span>
-        </div>
-        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse; margin-bottom: 12px;">
-          ${(q.breakdown || []).map(b => `
-            <tr style="border-bottom: 1px solid var(--color-gray-100);">
-              <td style="padding: 6px 0;">${b.concept}</td>
-              <td style="text-align: right; font-weight: 600;">$${b.cost.toLocaleString('es-MX')}</td>
-            </tr>
-          `).join('')}
-          <tr>
-            <td style="padding: 10px 0; font-weight: 700; font-size: 0.95rem;">TOTAL ESTIMADO:</td>
-            <td style="text-align: right; font-weight: 800; font-size: 1.1rem; color: var(--color-forest);">$${q.totalAmount.toLocaleString('es-MX')}</td>
-          </tr>
-        </table>
-        <div style="font-size: 0.78rem; color: var(--color-gray-500);">Válida hasta: ${q.validUntil}</div>
-      </div>
-    `;
-  } else {
-    detailHtml += `
-      <div style="text-align: center; padding: 20px; background: rgba(35, 78, 40, 0.04); border-radius: var(--radius-md);">
-        <p style="margin-bottom: 12px; font-size: 0.9rem;">Esta solicitud está pendiente de cotización técnica.</p>
-        <button type="button" class="btn btn-primary btn-sm" id="btnEmitQuote">
-          Emitir Cotización Rápida
-        </button>
-      </div>
-    `;
-  }
-
-  detailContainer.innerHTML = detailHtml;
-
-  document.getElementById('btnEmitQuote')?.addEventListener('click', () => {
-    service.status = 'ACCEPTED';
-    service.quote = {
-      totalAmount: 18500,
-      validUntil: '2026-09-01',
-      status: 'ISSUED',
-      breakdown: [
-        { concept: 'Diagnóstico en campo y análisis químico', cost: 8500 },
-        { concept: 'Plan de nutrición personalizado y seguimiento', cost: 10000 },
-      ]
-    };
-    saveAdminServices(services);
-    showToast("¡Cotización generada y guardada!");
-    modal?.classList.remove('active');
-    renderServicesTable();
+  detailContainer.querySelectorAll('[data-status]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        btn.disabled = true;
+        await setServiceStatus(serviceId, btn.dataset.status);
+        showToast(`Solicitud marcada como "${STATUS_LABELS[btn.dataset.status]}".`);
+        modal?.classList.remove('active');
+        await loadServices(true);
+        renderServicesTable();
+      } catch (error) {
+        console.error('Error actualizando solicitud:', error);
+        showToast('No se pudo actualizar el estado.');
+        btn.disabled = false;
+      }
+    });
   });
 
   modal?.classList.add('active');
