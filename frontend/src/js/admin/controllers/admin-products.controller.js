@@ -170,6 +170,15 @@ async function saveProductFromForm() {
   const price = parseFloat(document.getElementById('prodPrice').value) || 0;
   const stock = parseInt(document.getElementById('prodStock').value, 10) || 0;
 
+  if (!name) {
+    showToast('El nombre del producto es obligatorio.');
+    return;
+  }
+  if (price < 0 || stock < 0) {
+    showToast('El precio y el stock no pueden ser negativos.');
+    return;
+  }
+
   try {
     if (currentEditingProductId) {
       const product = adminCache.products.find(p => p.id === currentEditingProductId);

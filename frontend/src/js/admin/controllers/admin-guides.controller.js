@@ -3,13 +3,19 @@
    Educational Articles, Calculators & Resources CRUD
    ============================================ */
 
-import { getAdminGuides, saveAdminGuides } from '../data/admin-mock-data.js';
+import { apiFetch } from '../../config.js';
+import { adminCache, loadGuides } from '../data/admin-api.js';
 import { showToast } from '../../middleware/toast.middleware.js';
 
 let currentEditingGuideId = null;
 
 export function initAdminGuides() {
-  renderGuidesTable();
+  loadGuides()
+    .then(() => renderGuidesTable())
+    .catch(err => {
+      console.error('Error cargando guías:', err);
+      showToast('No se pudieron cargar las guías del servidor.');
+    });
   bindGuideEvents();
 }
 
@@ -17,13 +23,23 @@ export function renderGuidesTable() {
   const tbody = document.getElementById('adminGuidesTableBody');
   if (!tbody) return;
 
-  const guides = getAdminGuides();
+  const guides = adminCache.guides;
+
+  if (guides.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 32px; color: var(--color-gray-500);">
+          No hay guías educativas registradas todavía.
+        </td>
+      </tr>`;
+    return;
+  }
 
   tbody.innerHTML = guides.map(g => `
     <tr>
       <td>
         <div class="product-row-info">
-          <img src="${g.coverImage || 'https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?w=100'}" alt="${g.title}" class="product-thumb">
+          <img src="${g.coverImage}" alt="${g.title}" class="product-thumb">
           <div>
             <strong>${g.title}</strong>
             <div style="font-size: 0.75rem; color: var(--color-gray-500);">${g.author} • ${g.publishedAt}</div>
@@ -78,14 +94,11 @@ function bindGuideEvents() {
     const deleteBtn = e.target.closest('.btn-delete-guide');
 
     if (editBtn) {
-      const id = parseInt(editBtn.dataset.id, 10);
-      openEditGuideModal(id);
+      openEditGuideModal(editBtn.dataset.id);
     } else if (toggleBtn) {
-      const id = parseInt(toggleBtn.dataset.id, 10);
-      toggleGuideStatus(id);
+      toggleGuideStatus(toggleBtn.dataset.id);
     } else if (deleteBtn) {
-      const id = parseInt(deleteBtn.dataset.id, 10);
-      deleteGuide(id);
+      deleteGuide(deleteBtn.dataset.id);
     }
   });
 
@@ -96,8 +109,7 @@ function bindGuideEvents() {
 }
 
 function openEditGuideModal(id) {
-  const guides = getAdminGuides();
-  const guide = guides.find(g => g.id === id);
+  const guide = adminCache.guides.find(g => g.id === id);
   if (!guide) return;
 
   currentEditingGuideId = id;
@@ -113,66 +125,66 @@ function openEditGuideModal(id) {
   modal?.classList.add('active');
 }
 
-function saveGuideFromForm() {
-  const guides = getAdminGuides();
+async function saveGuideFromForm() {
   const title = document.getElementById('guideTitle').value.trim();
   const category = document.getElementById('guideCategory').value;
   const author = document.getElementById('guideAuthor').value.trim();
   const summary = document.getElementById('guideSummary').value.trim();
-  const coverImage = document.getElementById('guideImage').value.trim() || 'https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?w=600';
+  const coverImage = document.getElementById('guideImage').value.trim();
 
-  if (currentEditingGuideId) {
-    const index = guides.findIndex(g => g.id === currentEditingGuideId);
-    if (index !== -1) {
-      guides[index].title = title;
-      guides[index].category = category;
-      guides[index].author = author;
-      guides[index].summary = summary;
-      guides[index].coverImage = coverImage;
-      saveAdminGuides(guides);
-      showToast("Guía educativa actualizada exitosamente.");
-    }
-  } else {
-    const newGuide = {
-      id: Date.now(),
-      title,
-      slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      category,
-      author: author || 'Equipo Agronómico Honatu',
-      summary,
-      coverImage,
-      isPublished: true,
-      readCount: 1,
-      publishedAt: new Date().toISOString().split('T')[0],
-      resources: [
-        { id: Date.now(), name: 'Documento Técnico (PDF)', type: 'PDF', url: '#' }
-      ]
-    };
-    guides.unshift(newGuide);
-    saveAdminGuides(guides);
-    showToast("¡Nueva guía publicada en el blog!");
+  if (!title) {
+    showToast('El título de la guía es obligatorio.');
+    return;
   }
 
-  document.getElementById('guideModal')?.classList.remove('active');
-  renderGuidesTable();
-}
+  try {
+    const url = currentEditingGuideId ? `/api/guides/${currentEditingGuideId}` : '/api/guides';
+    const res = await apiFetch(url, {
+      method: currentEditingGuideId ? 'PUT' : 'POST',
+      body: JSON.stringify({ title, category, author, summary, coverImage: coverImage || undefined, isPublished: true })
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message);
 
-function toggleGuideStatus(id) {
-  const guides = getAdminGuides();
-  const guide = guides.find(g => g.id === id);
-  if (guide) {
-    guide.isPublished = !guide.isPublished;
-    saveAdminGuides(guides);
-    showToast(`Guía ${guide.isPublished ? 'publicada' : 'guardada como borrador'}.`);
+    showToast(currentEditingGuideId ? 'Guía educativa actualizada exitosamente.' : '¡Nueva guía publicada en el blog!');
+    document.getElementById('guideModal')?.classList.remove('active');
+    await loadGuides(true);
     renderGuidesTable();
+  } catch (error) {
+    console.error('Error guardando guía:', error);
+    showToast(error.message || 'No se pudo guardar la guía.');
   }
 }
 
-function deleteGuide(id) {
-  if (confirm("¿Estás seguro de eliminar esta guía educativa?")) {
-    const guides = getAdminGuides().filter(g => g.id !== id);
-    saveAdminGuides(guides);
-    showToast("Guía eliminada.");
+async function toggleGuideStatus(id) {
+  const guide = adminCache.guides.find(g => g.id === id);
+  if (!guide) return;
+
+  try {
+    const res = await apiFetch(`/api/guides/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ isPublished: !guide.isPublished })
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message);
+    showToast(`Guía ${!guide.isPublished ? 'publicada' : 'guardada como borrador'}.`);
+    await loadGuides(true);
     renderGuidesTable();
+  } catch (error) {
+    console.error('Error cambiando estado:', error);
+    showToast('No se pudo cambiar el estado de la guía.');
+  }
+}
+
+async function deleteGuide(id) {
+  if (!confirm('¿Estás seguro de eliminar esta guía educativa?')) return;
+
+  try {
+    const res = await apiFetch(`/api/guides/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message);
+    showToast('Guía eliminada.');
+    await loadGuides(true);
+    renderGuidesTable();
+  } catch (error) {
+    console.error('Error eliminando guía:', error);
+    showToast('No se pudo eliminar la guía.');
   }
 }

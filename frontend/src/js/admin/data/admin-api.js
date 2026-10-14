@@ -12,7 +12,9 @@ const cache = {
   workshops: [],
   enrollments: [],
   services: [],
-  orders: []
+  orders: [],
+  guides: [],
+  siteConfig: null
 };
 
 // Acceso síncrono al último estado cargado (los loaders lo actualizan)
@@ -163,6 +165,44 @@ export async function loadOrders(force = false) {
   const data = await fetchJson('/api/orders');
   cache.orders = data;
   return cache.orders;
+}
+
+export function mapGuide(g) {
+  return {
+    id: g.id,
+    title: g.title,
+    category: g.category || 'General',
+    author: g.author || 'Equipo Agronómico Honatu',
+    summary: g.summary || '',
+    coverImage: g.coverImage || 'https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?w=600',
+    isPublished: !!g.isPublished,
+    readCount: g.readCount || 0,
+    publishedAt: g.publishedAt || (g.createdAt ? g.createdAt.slice(0, 10) : ''),
+    resources: g.resources || []
+  };
+}
+
+export async function loadGuides(force = false) {
+  if (!force && cache.guides.length) return cache.guides;
+  const data = await fetchJson('/api/guides');
+  cache.guides = data.map(mapGuide);
+  return cache.guides;
+}
+
+export async function loadSiteConfig() {
+  if (cache.siteConfig) return cache.siteConfig;
+  cache.siteConfig = await fetchJson('/api/site-config').catch(() => ({}));
+  return cache.siteConfig;
+}
+
+export async function saveSiteConfig(config) {
+  const res = await apiFetch('/api/site-config', {
+    method: 'PUT',
+    body: JSON.stringify(config)
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message);
+  cache.siteConfig = config;
+  return config;
 }
 
 export function getStateDistribution(enrollments) {

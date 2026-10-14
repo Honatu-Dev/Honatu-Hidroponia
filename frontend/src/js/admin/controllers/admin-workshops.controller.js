@@ -217,6 +217,19 @@ async function saveWorkshopFromForm() {
   const maxCapacity = parseInt(document.getElementById('workshopCapacity').value, 10) || 20;
   const description = document.getElementById('workshopDesc').value.trim();
 
+  if (!title) {
+    showToast('El título del taller es obligatorio.');
+    return;
+  }
+  if (!date || isNaN(new Date(`${date}T${time}:00`).getTime())) {
+    showToast('La fecha del taller no es válida.');
+    return;
+  }
+  if (price < 0 || maxCapacity < 1) {
+    showToast('El precio no puede ser negativo y el cupo debe ser al menos 1.');
+    return;
+  }
+
   const payload = {
     title,
     scheduledDate: new Date(`${date}T${time}:00`).toISOString(),

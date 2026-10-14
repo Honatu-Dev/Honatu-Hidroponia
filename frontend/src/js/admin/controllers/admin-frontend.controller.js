@@ -3,7 +3,7 @@
    Live Visual Editor for Home Hero, Topbar & Promos
    ============================================ */
 
-import { getFrontendConfig, saveFrontendConfig } from '../data/admin-mock-data.js';
+import { loadSiteConfig, saveSiteConfig } from '../data/admin-api.js';
 import { showToast } from '../../middleware/toast.middleware.js';
 
 export function initAdminFrontend() {
@@ -12,8 +12,10 @@ export function initAdminFrontend() {
 }
 
 export function loadFrontendConfigIntoForm() {
-  const config = getFrontendConfig();
-  if (!config) return;
+  return loadSiteConfig().then(config => fillConfigForm(config)).catch(() => fillConfigForm({}));
+}
+
+function fillConfigForm(config) {
 
   // Hero Fields
   const h = config.hero || {};
@@ -119,6 +121,10 @@ function saveFrontendConfigFromForm() {
     }
   };
 
-  saveFrontendConfig(config);
-  showToast("¡Configuración del frontend guardada y publicada en la tienda!");
+  saveSiteConfig(config)
+    .then(() => showToast('¡Configuración del frontend guardada y publicada en la tienda!'))
+    .catch(err => {
+      console.error('Error guardando config:', err);
+      showToast('No se pudo guardar la configuración en el servidor.');
+    });
 }
