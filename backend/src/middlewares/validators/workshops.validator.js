@@ -70,10 +70,61 @@ export const createWorkshopValidator = [
     .optional({ checkFalsy: true })
     .isIn(['Presencial', 'Online', 'Híbrido'])
     .withMessage('La modalidad debe ser Presencial, Online o Híbrido'),
+  body('location')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage('La ubicación no puede superar 255 caracteres'),
   body('agenda')
     .optional({ checkFalsy: true })
     .isArray()
     .withMessage('La agenda debe ser un arreglo')
     .custom(value => value.every(item => typeof item === 'string' && item.length <= 255))
     .withMessage('Cada tema de la agenda debe ser texto de máximo 255 caracteres')
+];
+
+// Como createWorkshopValidator pero todos los campos son opcionales (edición)
+export const updateWorkshopValidator = [
+  body('title')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage('El título no puede superar 255 caracteres'),
+  body('scheduledDate')
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .withMessage('La fecha debe tener formato ISO8601 válido'),
+  body('capacity')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('El cupo debe ser un entero mayor o igual a 1'),
+  body('price')
+    .optional()
+    .isDecimal({ decimal_digits: '0,2' })
+    .withMessage('El precio debe ser un decimal válido')
+    .custom(value => Number(value) >= 0)
+    .withMessage('El precio no puede ser negativo'),
+  body('description')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 5000 })
+    .withMessage('La descripción es demasiado larga'),
+  body('imageUrl')
+    .optional({ checkFalsy: true })
+    .isURL()
+    .withMessage('La URL de imagen no es válida')
+    .isLength({ max: 255 }),
+  body('modality')
+    .optional({ checkFalsy: true })
+    .isIn(['Presencial', 'Online', 'Híbrido'])
+    .withMessage('La modalidad debe ser Presencial, Online o Híbrido'),
+  body('location')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage('La ubicación no puede superar 255 caracteres'),
+  body('agenda')
+    .optional({ checkFalsy: true })
+    .isArray()
+    .withMessage('La agenda debe ser un arreglo')
 ];

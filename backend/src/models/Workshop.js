@@ -10,6 +10,7 @@ const Workshop = sequelize.define('Workshop', {
   price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
   imageUrl: { type: DataTypes.STRING },
   modality: { type: DataTypes.ENUM('Presencial', 'Online', 'Híbrido'), defaultValue: 'Presencial' },
+  location: { type: DataTypes.STRING },
   agenda: { type: DataTypes.JSONB } // Array de strings (temas del taller)
 }, { timestamps: true });
 
