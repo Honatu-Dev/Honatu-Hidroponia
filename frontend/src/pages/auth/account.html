@@ -327,6 +327,14 @@
                 </svg>
                 Mis Talleres
               </button>
+              <button class="account-nav-btn" data-tab="tab-orders">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+                Mis Pedidos
+              </button>
               <button id="logoutBtn" class="account-nav-btn" style="color: var(--color-terracotta); margin-top: 16px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-terracotta)"
                   stroke-width="2">
@@ -380,6 +388,16 @@
 
               <div id="myWorkshopsList">
                 <p style="color: var(--color-gray-500); font-size: 0.95rem;">Cargando tus inscripciones...</p>
+              </div>
+            </div>
+
+            <!-- TAB: MIS PEDIDOS -->
+            <div id="tab-orders" class="account-tab-content">
+              <h2 class="account-title">Mis Pedidos</h2>
+              <p class="account-subtitle">Consulta el historial y estado de tus compras de insumos.</p>
+
+              <div id="myOrdersList">
+                <p style="color: var(--color-gray-500); font-size: 0.95rem;">Cargando tus pedidos...</p>
               </div>
             </div>
 
@@ -551,8 +569,73 @@
         }
       }
 
+      // Carga los pedidos del usuario desde la API
+      async function loadMyOrders() {
+        const container = document.getElementById('myOrdersList');
+        if (!container) return;
+
+        const statusLabels = {
+          PENDING: ['Pendiente', 'rgba(217, 119, 6, 0.15)', '#b45309'],
+          PAID: ['Pagado', 'var(--color-sage-light)', 'var(--color-forest-dark)'],
+          SHIPPED: ['Enviado', 'var(--color-sage-light)', 'var(--color-forest-dark)'],
+          DELIVERED: ['Entregado', 'var(--color-sage-light)', 'var(--color-forest-dark)'],
+          CANCELLED: ['Cancelado', 'rgba(220, 38, 38, 0.12)', '#b91c1c']
+        };
+
+        try {
+          const res = await apiFetch('/api/orders/my');
+          if (!res.ok) {
+            container.innerHTML = '<p style="color: var(--color-gray-500);">No se pudieron cargar tus pedidos.</p>';
+            return;
+          }
+
+          const orders = await res.json();
+          if (orders.length === 0) {
+            container.innerHTML = `
+              <div style="text-align: center; padding: var(--space-2xl) var(--space-md); border: 1px dashed var(--color-gray-300); border-radius: var(--radius-md);">
+                <p style="font-size: 1.05rem; font-weight: 600; color: var(--color-forest); margin-bottom: 6px;">Aún no tienes pedidos.</p>
+                <p style="font-size: 0.9rem; color: var(--color-gray-500); margin-bottom: 16px;">Explora nuestros insumos hidropónicos y realiza tu primera compra.</p>
+                <a href="../shop/shop.html" class="btn btn-primary btn-sm">Ir a la Tienda &rarr;</a>
+              </div>`;
+            return;
+          }
+
+          container.innerHTML = orders.map(order => {
+            const [label, bg, color] = statusLabels[order.status] || statusLabels.PENDING;
+            const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString('es-MX', {
+              year: 'numeric', month: 'long', day: 'numeric'
+            }) : '';
+            const items = (order.OrderItems || []).map(item => {
+              const name = escapeHtml(item.ProductVariant?.Product?.name || 'Producto');
+              return `<li>${escapeHtml(String(item.quantity))} × ${name} — $${Number(item.unitPrice).toLocaleString('es-MX')} MXN</li>`;
+            }).join('');
+
+            return `
+              <div class="order-card" style="margin-bottom: var(--space-md);">
+                <div class="order-header">
+                  <div>
+                    <span class="order-id">Pedido #${escapeHtml(order.id.slice(0, 8).toUpperCase())}</span>
+                    <span style="font-size: 0.8rem; color: var(--color-gray-500); margin-left: 8px;">${escapeHtml(dateStr)}</span>
+                  </div>
+                  <span class="badge-status" style="background: ${bg}; color: ${color};">${label}</span>
+                </div>
+                <ul class="order-items-list" style="font-size: 0.9rem; color: var(--color-gray-600); margin: 8px 0; padding-left: 20px;">
+                  ${items}
+                </ul>
+                <div class="order-footer">
+                  <span>Total: $${Number(order.totalAmount).toLocaleString('es-MX')} MXN</span>
+                </div>
+              </div>`;
+          }).join('');
+        } catch (error) {
+          console.error('Error cargando pedidos:', error);
+          container.innerHTML = '<p style="color: var(--color-terracotta);">Error al conectar con el servidor.</p>';
+        }
+      }
+
       await loadProfile();
       await loadMyWorkshops();
+      await loadMyOrders();
 
       // 3. Tab Navigation
       const navBtns = document.querySelectorAll('.account-nav-btn[data-tab]');

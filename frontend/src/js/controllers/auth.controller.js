@@ -452,6 +452,8 @@ function handleAuthSuccess({ role = 'CLIENT', name = 'Cultivador', email = 'clie
   setString(StorageKeys.AUTH_ROLE, role);
   setItem(StorageKeys.AUTH_USER, authUser);
 
+  window.dispatchEvent(new CustomEvent('honatu:auth:login'));
+
   closeLoginModal();
   if (message) showToast(message);
 
