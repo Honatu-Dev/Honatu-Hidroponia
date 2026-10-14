@@ -1,4 +1,5 @@
 import { Order, OrderItem, ProductVariant, Product, User, ClientProfile, sequelize } from '../models/index.js';
+import { getPagination, pagedResponse } from '../middlewares/pagination.js';
 
 // 1. Crear una orden a partir de los artículos del carrito (Usuario autenticado)
 export const createOrder = async (req, res) => {
@@ -92,13 +93,21 @@ export const getMyOrders = async (req, res) => {
 // 3. Obtener todas las órdenes (Solo Admins)
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.findAll({
+    const pagination = getPagination(req);
+    const options = {
       include: [
         { model: User, attributes: ['id', 'email'], include: [{ model: ClientProfile, attributes: ['fullName', 'phone'] }] },
         { model: OrderItem, include: [{ model: ProductVariant, include: [{ model: Product }] }] }
       ],
       order: [['createdAt', 'DESC']]
-    });
+    };
+
+    if (pagination) {
+      const result = await Order.findAndCountAll({ ...options, limit: pagination.limit, offset: pagination.offset, distinct: true });
+      return res.json(pagedResponse(result, pagination));
+    }
+
+    const orders = await Order.findAll(options);
     res.json(orders);
   } catch (error) {
     console.error('Error in getAllOrders:', error);

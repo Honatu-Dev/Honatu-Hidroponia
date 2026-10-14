@@ -1,9 +1,25 @@
 import { Product, ProductVariant, sequelize } from '../models/index.js';
+import { getPagination, pagedResponse } from '../middlewares/pagination.js';
 
 // 1. Listar productos activos con sus variantes (Público)
+//    Sin parámetros devuelve arreglo completo; con ?page&limit devuelve { items, total, page, pages }
 export const getProducts = async (req, res) => {
   try {
     const where = req.user && req.user.role === 'ADMIN' ? {} : { isActive: true };
+    const pagination = getPagination(req);
+
+    if (pagination) {
+      const result = await Product.findAndCountAll({
+        where,
+        include: [{ model: ProductVariant }],
+        order: [['createdAt', 'DESC']],
+        limit: pagination.limit,
+        offset: pagination.offset,
+        distinct: true
+      });
+      return res.json(pagedResponse(result, pagination));
+    }
+
     const products = await Product.findAll({
       where,
       include: [{ model: ProductVariant }],

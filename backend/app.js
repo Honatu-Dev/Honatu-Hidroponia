@@ -14,6 +14,8 @@ import serviceRequestsRoutes from './src/routes/serviceRequests.routes.js';
 import productsRoutes from './src/routes/products.routes.js';
 import ordersRoutes from './src/routes/orders.routes.js';
 import cartRoutes from './src/routes/cart.routes.js';
+import guidesRoutes from './src/routes/guides.routes.js';
+import siteConfigRoutes from './src/routes/siteConfig.routes.js';
 
 dotenv.config();
 
@@ -79,6 +81,8 @@ app.use('/api/service-requests', serviceRequestsRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/guides', guidesRoutes);
+app.use('/api/site-config', siteConfigRoutes);
 
 /**
  * @openapi

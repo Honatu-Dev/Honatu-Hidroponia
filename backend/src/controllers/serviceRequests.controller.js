@@ -1,4 +1,5 @@
 import { ServiceRequest, User, ClientProfile } from '../models/index.js';
+import { getPagination, pagedResponse } from '../middlewares/pagination.js';
 
 // 1. Crear una solicitud de servicio (Soporta usuarios logueados e invitados)
 export const createServiceRequest = async (req, res) => {
@@ -53,7 +54,7 @@ export const getMyServiceRequests = async (req, res) => {
 // 3. Obtener todas las solicitudes (Solo Admins)
 export const getAllServiceRequests = async (req, res) => {
   try {
-    const requests = await ServiceRequest.findAll({
+    const options = {
       include: [
         {
           model: User,
@@ -62,7 +63,20 @@ export const getAllServiceRequests = async (req, res) => {
         }
       ],
       order: [['createdAt', 'DESC']]
-    });
+    };
+
+    const pagination = getPagination(req);
+    if (pagination) {
+      const result = await ServiceRequest.findAndCountAll({
+        ...options,
+        limit: pagination.limit,
+        offset: pagination.offset,
+        distinct: true
+      });
+      return res.json(pagedResponse(result, pagination));
+    }
+
+    const requests = await ServiceRequest.findAll(options);
     res.json(requests);
   } catch (error) {
     console.error('Error in getAllServiceRequests:', error);

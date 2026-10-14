@@ -22,6 +22,20 @@ const router = express.Router();
  *   get:
  *     summary: Obtener el catálogo de productos con sus variantes
  *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Número de página (activa respuesta paginada)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Elementos por página (default 20)
  *     responses:
  *       200:
  *         description: Lista de productos activos
