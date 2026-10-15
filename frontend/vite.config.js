@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   root: 'src',
-  base: '/Honatu-Hidroponia/',
+  base: '/',
   build: {
     outDir: '../dist',
     emptyOutDir: true,

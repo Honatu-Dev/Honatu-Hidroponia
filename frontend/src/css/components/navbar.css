@@ -252,6 +252,16 @@
 }
 
 /* Media Queries for Navbar */
+@media (max-width: 640px) {
+  .navbar {
+    padding: 0 var(--space-md);
+  }
+
+  .nav-logo img {
+    height: 52px;
+  }
+}
+
 @media (max-width: 900px) {
   .nav-menu {
     position: fixed;

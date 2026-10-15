@@ -1,6 +1,10 @@
-# Entity-Relationship (E-R) Model — Honatu Hidroponía
+# Entity-Relationship (E-R) Model — Honatu Hidroponía (Aspiracional)
 
-This document specifies the complete **Entity-Relationship (E-R) Model** for the relational database of **Honatu Hidroponía**. The design follows the platform's unified architecture, allowing both **Clients** (purchases, workshop registrations, service requests, guide browsing) and **Administrators** (catalog management, inventory, workshop moderation, quote tracking, and auditing) to interact securely through a single system.
+> **Estado:** documento aspiracional / histórico. Describe un modelo de datos enriquecido (roles granulares, catálogo de estados, reseñas, cotizaciones, invernaderos, guías, auditoría) que **no está implementado** en la base de código actual.
+>
+> La fuente de verdad del MVP se encuentra en `docs/database.md`, `backend/src/models/` y `backend/schema.sql`.
+
+This document specifies a **future / aspirational Entity-Relationship (E-R) Model** for the relational database of **Honatu Hidroponía**. The design follows the platform's unified architecture, allowing both **Clients** (purchases, workshop registrations, service requests, guide browsing) and **Administrators** (catalog management, inventory, workshop moderation, quote tracking, and auditing) to interact securely through a single system.
 
 > **Changelog vs. previous version:** added `PERMISSION` / `ROLE_PERMISSION` (referenced in the text but never modeled), added `PRODUCT_REVIEW` (referenced in the global diagram but never defined), added the `STATE_MX` catalog (Mexican states) to replace the free-text `state` field, and renamed every entity/attribute to English.
 

@@ -8,7 +8,7 @@
   <meta name="description" content="Agenda una cita de asesoría especializada con los expertos en hidroponía de Honatu.">
 
   <link rel="stylesheet" href="../../css/main.css">
-  <link rel="stylesheet" href="../../css/pages/home.css">
+  <link rel="stylesheet" href="../../css/pages/subpage.css">
   <link rel="icon" href="../../assets/logo/Logo.png" type="image/png">
 
   <script type="module" src="../../js/app.js"></script>
@@ -62,7 +62,7 @@
                 <p style="font-weight: 600; color: var(--color-forest); margin-bottom: var(--space-sm); font-size: 0.95rem;">
                   <span id="selectedDateLabel" style="color: var(--color-terracotta);">Selecciona una fecha</span>
                 </p>
-                <div id="timeSlots" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"></div>
+                <div id="timeSlots" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;"></div>
               </div>
             </div>
 
@@ -407,8 +407,6 @@
 
             if (window.showToast) {
               window.showToast(`¡Cita agendada! ${dateStr} a las ${selectedTime}. Te contactaremos para confirmar.`);
-            } else {
-              alert(`¡Cita agendada exitosamente!\n\n${dateStr} a las ${selectedTime}\n\nTe contactaremos por correo y WhatsApp para confirmar.`);
             }
             bookingForm.reset();
             selectedDate = null;

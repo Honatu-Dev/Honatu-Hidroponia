@@ -9,6 +9,7 @@ const sequelize = new Sequelize(
   process.env.DB_PASS || 'postgres',
   {
     host: process.env.DB_HOST || 'localhost',
+    port: Number(process.env.DB_PORT) || 5432,
     dialect: 'postgres',
     logging: false, // Set to console.log to see SQL queries
   }
@@ -23,7 +24,9 @@ const connectDB = async () => {
     await import('../models/index.js');
 
     // Auto-sync models (sincroniza las tablas con PostgreSQL automáticamente)
-    // await sequelize.sync({ alter: true }); // Deshabilitado porque causa error con ENUM de Users
+    if (process.env.DB_SYNC === 'true') {
+      await sequelize.sync();
+    }
   } catch (error) {
     console.error('Unable to connect to the database:', error);
     process.exit(1);

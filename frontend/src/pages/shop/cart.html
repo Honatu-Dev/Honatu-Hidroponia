@@ -96,6 +96,16 @@
   <div id="loginModal" class="login-modal" aria-hidden="true" role="dialog"></div>
 
   <script>
+    function htmlEscape(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       // Re-render cart specifically for full checkout page
       const cart = JSON.parse(localStorage.getItem('honatu-cart') || '[]');
@@ -117,10 +127,10 @@
         }
 
         fullCartItems.innerHTML = cart.map(item => `
-          <div class="checkout-item" data-id="${item.id}">
-            <img src="${item.img}" alt="${item.name}">
+          <div class="checkout-item" data-id="${htmlEscape(item.id)}">
+            <img src="${htmlEscape(item.img)}" alt="${htmlEscape(item.name)}">
             <div class="checkout-item-info">
-              <h4>${item.name}</h4>
+              <h4>${htmlEscape(item.name)}</h4>
               <p class="price">$${item.price.toLocaleString('es-MX')} MXN</p>
             </div>
             <div class="checkout-item-qty">
@@ -138,10 +148,8 @@
         btnFinalizarCompra.addEventListener('click', (e) => {
           e.preventDefault();
           if (cart.length === 0) {
-            if (window.showToast) {
+            if (typeof window.showToast === 'function') {
               window.showToast("Tu carrito está vacío.");
-            } else {
-              alert("Tu carrito está vacío.");
             }
             return;
           }

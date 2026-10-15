@@ -935,8 +935,13 @@
   }
 
   .about-stats {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: var(--space-sm);
+  }
+
+  .about-image-main {
+    height: auto;
+    max-height: 420px;
   }
 
   .impact-stat {
@@ -971,5 +976,12 @@
 
   .map-frame {
     height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-panel {
+    width: 100%;
+    max-width: 100vw;
   }
 }

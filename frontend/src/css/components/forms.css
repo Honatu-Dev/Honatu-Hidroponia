@@ -240,7 +240,11 @@
 }
 
 /* Mobile Responsiveness */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
   .form-vine-wrapper.top-left {
     top: -10px;
     left: -10px;

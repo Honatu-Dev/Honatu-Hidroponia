@@ -16,3 +16,10 @@
 @import './components/loader.css';
 @import './components/modals.css';
 @import './components/toast.css';
+
+/* Responsive container padding */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 var(--space-md);
+  }
+}

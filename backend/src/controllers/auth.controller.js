@@ -9,12 +9,7 @@ export const register = async (req, res) => {
   try {
     const { email, password, fullName, phone } = req.body;
 
-    // 1. Validaciones básicas
-    if (!email || !password || !fullName) {
-      return res.status(400).json({ message: 'Por favor envía email, password y fullName.' });
-    }
-
-    // 2. Verificar si el usuario ya existe
+    // 1. Verificar si el usuario ya existe
     const userExists = await User.findOne({ where: { email } });
     if (userExists) {
       return res.status(400).json({ message: 'El correo electrónico ya está registrado.' });
@@ -70,10 +65,6 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Por favor ingresa email y contraseña.' });
-    }
 
     // 1. Buscar usuario con su perfil
     const user = await User.findOne({
@@ -218,8 +209,8 @@ export const changePassword = async (req, res) => {
       return res.status(400).json({ message: 'Por favor envía contraseña actual y nueva contraseña.' });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 6 caracteres.' });
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 8 caracteres.' });
     }
 
     const user = await User.findByPk(req.user.id);
