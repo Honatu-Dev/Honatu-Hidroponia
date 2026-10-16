@@ -97,10 +97,32 @@
                   </div>
 
                   <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
-                    <label for="book-location" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Ubicación del proyecto *</label>
-                    <input type="text" id="book-location" required placeholder="Ciudad / Colonia"
+                    <label for="book-location" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Zona de Querétaro *</label>
+                    <select id="book-location" required
                       style="padding: 10px 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; color: var(--color-forest); background: var(--color-off-white); transition: border 0.2s ease;"
                       onfocus="this.style.borderColor='var(--color-sage)'" onblur="this.style.borderColor='var(--color-gray-200)'">
+                      <option value="">Selecciona una zona</option>
+                      <optgroup label="Zona Centro">
+                        <option value="Querétaro Centro">Querétaro Centro</option>
+                        <option value="El Refugio">El Refugio</option>
+                        <option value="El Pueblito">El Pueblito</option>
+                        <option value="San Juan del Río">San Juan del Río</option>
+                      </optgroup>
+                      <optgroup label="Zona Norte">
+                        <option value="Tequisquiapan">Tequisquiapan</option>
+                        <option value="Ezequiel Montes">Ezequiel Montes</option>
+                        <option value="Cadereyta">Cadereyta</option>
+                      </optgroup>
+                      <optgroup label="Zona Sur">
+                        <option value="Jalpan de Serra">Jalpan de Serra</option>
+                        <option value="Landa de Matamoros">Landa de Matamoros</option>
+                        <option value="Peñamiller">Peñamiller</option>
+                      </optgroup>
+                      <optgroup label="Zona Poniente">
+                        <option value="Amealco">Amealco</option>
+                        <option value="Pedro Escobedo">Pedro Escobedo</option>
+                      </optgroup>
+                    </select>
                   </div>
 
                   <div style="display: flex; flex-direction: column; gap: var(--space-xs);">

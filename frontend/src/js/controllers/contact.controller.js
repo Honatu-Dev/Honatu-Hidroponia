@@ -10,6 +10,7 @@ function getPayload(form) {
     return {
       serviceType: form.querySelector('#tipo_servicio')?.value || 'contacto',
       details: form.querySelector('#mensaje')?.value || '',
+      location: form.querySelector('#ubicacion')?.value || 'Querétaro',
       guestName: form.querySelector('#nombre')?.value || '',
       guestEmail: form.querySelector('#email')?.value || '',
       guestPhone: form.querySelector('#telefono')?.value || ''
@@ -61,15 +62,22 @@ export function initContactForm() {
       setLoading(true);
 
       try {
+        const payload = getPayload(form);
+        console.log('[FORM_SUBMISSION] Sending request:', { formId: form.id, payload });
+
         const response = await apiFetch('/api/service-requests', {
           method: 'POST',
-          body: JSON.stringify(getPayload(form))
+          body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
+          console.log('[FORM_SUBMISSION] ERROR_RESPONSE:', { status: response.status, message: data.message });
           throw new Error(data.message || 'No se pudo enviar la solicitud.');
         }
+
+        const result = await response.json();
+        console.log('[FORM_SUBMISSION] SUCCESS: Request saved to database:', { requestId: result.serviceRequest?.id, formId: form.id });
 
         setSuccess();
 
@@ -82,7 +90,7 @@ export function initContactForm() {
           form.reset();
         }, 3500);
       } catch (error) {
-        console.error('Error enviando solicitud:', error);
+        console.error('[FORM_SUBMISSION] ERROR_NETWORK:', error.message);
         if (window.showToast) {
           window.showToast(error.message || 'No se pudo enviar la solicitud. Intenta de nuevo más tarde.', 'error');
         }
