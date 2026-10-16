@@ -9,6 +9,7 @@ import './middleware/toast.middleware.js'; // self-registers showToast globally
 
 // --- Services ---
 import { initCloudinaryImages } from './services/cloudinary.service.js';
+import { initPhoneFormatting } from './utils/phone-formatter.js';
 
 // --- Controllers ---
 import { initLoader } from './controllers/loader.controller.js';
@@ -35,6 +36,7 @@ function bootstrapApp() {
 
   // Services & Assets
   try { initCloudinaryImages(); } catch (e) { console.warn('Cloudinary init error:', e); }
+  try { initPhoneFormatting(); } catch (e) { console.warn('Phone formatting error:', e); }
 
   // Middleware
   try { initRevealAnimations(); } catch (e) { console.warn('Reveal animations error:', e); }
