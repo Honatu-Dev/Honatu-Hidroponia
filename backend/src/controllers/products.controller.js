@@ -5,7 +5,8 @@ import { getPagination, pagedResponse } from '../middlewares/pagination.js';
 //    Sin parámetros devuelve arreglo completo; con ?page&limit devuelve { items, total, page, pages }
 export const getProducts = async (req, res) => {
   try {
-    const where = req.user && req.user.role === 'ADMIN' ? {} : { isActive: true };
+    const isAdmin = req.user?.role === 'ADMIN';
+    const where = isAdmin ? {} : { isActive: true };
     const pagination = getPagination(req);
 
     if (pagination) {
