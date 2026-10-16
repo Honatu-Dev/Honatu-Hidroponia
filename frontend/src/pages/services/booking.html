@@ -97,10 +97,14 @@
                   </div>
 
                   <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
-                    <label for="book-location" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Ubicación del proyecto *</label>
-                    <input type="text" id="book-location" required placeholder="Ciudad / Colonia"
+                    <label for="book-location" style="font-weight: 600; color: var(--color-forest); font-size: 0.9rem;">Estado *</label>
+                    <select id="book-location" required
                       style="padding: 10px 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; color: var(--color-forest); background: var(--color-off-white); transition: border 0.2s ease;"
                       onfocus="this.style.borderColor='var(--color-sage)'" onblur="this.style.borderColor='var(--color-gray-200)'">
+                      <option value="">Selecciona un estado</option>
+                      <option value="Querétaro" selected>Querétaro</option>
+                    </select>
+                    <p style="font-size: 0.85rem; color: var(--color-gray-600); margin: 0;">Por el momento solo operamos en Querétaro</p>
                   </div>
 
                   <div style="display: flex; flex-direction: column; gap: var(--space-xs);">

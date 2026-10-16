@@ -10,6 +10,7 @@ function getPayload(form) {
     return {
       serviceType: form.querySelector('#tipo_servicio')?.value || 'contacto',
       details: form.querySelector('#mensaje')?.value || '',
+      location: form.querySelector('#ubicacion')?.value || 'Querétaro',
       guestName: form.querySelector('#nombre')?.value || '',
       guestEmail: form.querySelector('#email')?.value || '',
       guestPhone: form.querySelector('#telefono')?.value || ''

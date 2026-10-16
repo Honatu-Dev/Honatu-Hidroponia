@@ -71,10 +71,20 @@
               </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
-              <label for="telefono" style="font-weight: 600; color: var(--color-forest);">Teléfono / WhatsApp</label>
-              <input type="tel" id="telefono" name="telefono" placeholder="+52 442 123 4567"
-                style="padding: var(--space-md); border: 1px solid var(--color-sage); border-radius: var(--radius-md); font-family: inherit; font-size: 1rem; color: var(--color-forest);">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-md);">
+              <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                <label for="telefono" style="font-weight: 600; color: var(--color-forest);">Teléfono / WhatsApp</label>
+                <input type="tel" id="telefono" name="telefono" placeholder="+52 442 123 4567"
+                  style="padding: var(--space-md); border: 1px solid var(--color-sage); border-radius: var(--radius-md); font-family: inherit; font-size: 1rem; color: var(--color-forest);">
+              </div>
+              <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                <label for="ubicacion" style="font-weight: 600; color: var(--color-forest);">Estado *</label>
+                <select id="ubicacion" name="ubicacion" required
+                  style="padding: var(--space-md); border: 1px solid var(--color-sage); border-radius: var(--radius-md); font-family: inherit; font-size: 1rem; color: var(--color-forest); background: var(--color-off-white);">
+                  <option value="">Selecciona un estado</option>
+                  <option value="Querétaro" selected>Querétaro</option>
+                </select>
+              </div>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
