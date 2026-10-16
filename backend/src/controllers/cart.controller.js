@@ -25,9 +25,11 @@ export const addCartItem = async (req, res) => {
   try {
     const { productVariantId } = req.body;
     const quantity = req.body.quantity || 1;
+    console.log('🛒 [CART] Agregando al carrito:', { userId: req.user.id, productVariantId, quantity });
 
     const variant = await ProductVariant.findByPk(productVariantId, { include: [{ model: Product }] });
     if (!variant || !variant.Product?.isActive) {
+      console.log('❌ Producto no disponible:', productVariantId);
       return res.status(404).json({ message: 'Producto no disponible' });
     }
 
@@ -39,12 +41,15 @@ export const addCartItem = async (req, res) => {
     if (!created) {
       item.quantity += quantity;
       await item.save();
+      console.log('✅ Cantidad actualizada:', { itemId: item.id, nuevaCantidad: item.quantity });
+    } else {
+      console.log('✅ Nuevo item agregado:', { itemId: item.id, cantidad: quantity });
     }
 
     const full = await CartItem.findByPk(item.id, { include: [includeVariant] });
     res.status(created ? 201 : 200).json({ message: 'Artículo agregado al carrito', item: full });
   } catch (error) {
-    console.error('Error in addCartItem:', error);
+    console.error('❌ Error in addCartItem:', error.message);
     res.status(500).json({ message: 'Error al agregar al carrito.' });
   }
 };

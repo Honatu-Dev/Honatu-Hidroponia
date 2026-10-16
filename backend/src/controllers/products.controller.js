@@ -53,11 +53,13 @@ export const createProduct = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { name, description, category, imageUrl, isActive, variants } = req.body;
+    console.log('📦 [PRODUCT] Creando producto:', { name, category, isActive });
 
     const product = await Product.create(
       { name, description, category, imageUrl, isActive },
       { transaction }
     );
+    console.log('✅ Producto creado:', product.id);
 
     if (Array.isArray(variants) && variants.length > 0) {
       await ProductVariant.bulkCreate(
