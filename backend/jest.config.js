@@ -9,5 +9,6 @@ export default {
   ],
   coveragePathIgnorePatterns: ['/node_modules/'],
   testTimeout: 10000,
-  verbose: true
+  verbose: true,
+  transform: {}
 };
