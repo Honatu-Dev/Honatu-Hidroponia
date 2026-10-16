@@ -5,7 +5,7 @@ import { getPagination, pagedResponse } from '../middlewares/pagination.js';
 export const createServiceRequest = async (req, res) => {
   try {
     const { serviceType, details, requestedDate, location, guestName, guestEmail, guestPhone } = req.body;
-    console.log('📝 [SERVICE REQUEST] Creando solicitud:', { serviceType, details, requestedDate, location, guestName, guestEmail });
+    console.log('[SERVICE_REQUEST] Creating request:', { serviceType, details, requestedDate, location, guestName, guestEmail });
 
     const requestData = {
       serviceType,
@@ -17,27 +17,27 @@ export const createServiceRequest = async (req, res) => {
 
     if (req.user && req.user.id) {
       requestData.userId = req.user.id;
-      console.log('✅ Solicitud de usuario autenticado:', req.user.id);
+      console.log('[SERVICE_REQUEST] SUCCESS: Authenticated user request:', req.user.id);
     } else {
       if (!guestName || !guestEmail) {
-        console.log('❌ Solicitud de invitado sin datos requeridos');
+        console.log('[SERVICE_REQUEST] ERROR_VALIDATION: Missing guest data');
         return res.status(400).json({ message: 'Para enviar la solicitud sin cuenta, requerimos tu nombre y correo' });
       }
       requestData.guestName = guestName.trim();
       requestData.guestEmail = guestEmail.toLowerCase().trim();
       requestData.guestPhone = guestPhone ? guestPhone.trim() : null;
-      console.log('✅ Solicitud de invitado:', { guestName, guestEmail });
+      console.log('[SERVICE_REQUEST] SUCCESS: Guest request:', { guestName, guestEmail });
     }
 
     const serviceRequest = await ServiceRequest.create(requestData);
-    console.log('✅ Solicitud guardada en BD:', serviceRequest.id);
+    console.log('[SERVICE_REQUEST] SUCCESS: Saved to database:', serviceRequest.id);
 
     res.status(201).json({
       message: '¡Solicitud enviada con éxito!',
       serviceRequest
     });
   } catch (error) {
-    console.error('❌ Error creating service request:', error.message);
+    console.error('[SERVICE_REQUEST] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al procesar la solicitud' });
   }
 };
