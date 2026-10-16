@@ -105,21 +105,21 @@
               <div class="form-grid full">
                 <div class="form-group">
                   <label class="form-label">Nombre Completo</label>
-                  <input type="text" class="form-input" placeholder="Ej. Juan Pérez" required>
+                  <input type="text" id="shipName" class="form-input" placeholder="Ej. Juan Pérez" required>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Dirección (Calle y número)</label>
-                  <input type="text" class="form-input" placeholder="Ej. Av. Siempreviva 742" required>
+                  <input type="text" id="shipAddress" class="form-input" placeholder="Ej. Av. Siempreviva 742" required>
                 </div>
               </div>
               <div class="form-grid" style="margin-top: var(--space-md);">
                 <div class="form-group">
                   <label class="form-label">Ciudad</label>
-                  <input type="text" class="form-input" required>
+                  <input type="text" id="shipCity" class="form-input" required>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Código Postal</label>
-                  <input type="text" class="form-input" required>
+                  <input type="text" id="shipZip" class="form-input" required>
                 </div>
               </div>
             </form>
@@ -247,17 +247,56 @@
             return;
           }
 
+          // Validate shipping form
+          const shippingForm = document.getElementById('shippingForm');
+          if (shippingForm && !shippingForm.reportValidity()) {
+            return;
+          }
+
+          const shippingAddress = [
+            document.getElementById('shipName')?.value.trim(),
+            document.getElementById('shipAddress')?.value.trim(),
+            document.getElementById('shipCity')?.value.trim(),
+            'C.P. ' + (document.getElementById('shipZip')?.value.trim() || '')
+          ].filter(Boolean).join(', ');
+
+          const items = cart
+            .filter(item => item.id && item.qty > 0)
+            .map(item => ({ productVariantId: item.id, quantity: item.qty }));
+
           // Show processing state
           btnConfirmPayment.textContent = 'Procesando...';
           btnConfirmPayment.disabled = true;
           btnConfirmPayment.style.opacity = '0.7';
 
-          setTimeout(() => {
-            // Empty Cart
-            localStorage.setItem('honatu-cart', '[]');
-            // Redirect to Thank You Page
-            window.location.href = 'thanks.html';
-          }, 1500);
+          (async () => {
+            try {
+              const { apiFetch } = await import('../../js/config.js');
+              const response = await apiFetch('/api/orders', {
+                method: 'POST',
+                body: JSON.stringify({ items, shippingAddress })
+              });
+
+              const data = await response.json().catch(() => ({}));
+              if (!response.ok) {
+                throw new Error(data.message || 'No se pudo procesar el pedido.');
+              }
+
+              // Empty Cart (local + servidor)
+              localStorage.setItem('honatu-cart', '[]');
+              apiFetch('/api/cart', { method: 'DELETE' }).catch(() => {});
+              // Redirect to Thank You Page
+              window.location.href = 'thanks.html';
+            } catch (error) {
+              console.error('Error creando pedido:', error);
+              if (window.showToast) {
+                window.showToast(error.message || 'No se pudo procesar el pedido. Intenta de nuevo.', 'error');
+              }
+              btnConfirmPayment.textContent = 'Confirmar y Pagar';
+              btnConfirmPayment.disabled = false;
+              btnConfirmPayment.style.opacity = '1';
+            }
+          })();
         });
       }
     });

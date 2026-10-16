@@ -3,14 +3,22 @@
    Workshop CRUD, Registered Attendees & State Demographics
    ============================================ */
 
-import { getAdminWorkshops, saveAdminWorkshops, getAttendeeStateDistribution, MEXICAN_STATES } from '../data/admin-mock-data.js';
+import { apiFetch } from '../../config.js';
+import { adminCache, loadWorkshops, getStateDistribution } from '../data/admin-api.js';
 import { showToast } from '../../middleware/toast.middleware.js';
 
 let currentEditingWorkshopId = null;
 
 export function initAdminWorkshops() {
-  renderWorkshopsTable();
-  renderGeoDistribution();
+  loadWorkshops()
+    .then(() => {
+      renderWorkshopsTable();
+      renderGeoDistribution();
+    })
+    .catch(err => {
+      console.error('Error cargando talleres:', err);
+      showToast('No se pudieron cargar los talleres del servidor.');
+    });
   bindWorkshopEvents();
 }
 
@@ -18,7 +26,17 @@ export function renderWorkshopsTable() {
   const tableBody = document.getElementById('adminWorkshopsTableBody');
   if (!tableBody) return;
 
-  const workshops = getAdminWorkshops();
+  const workshops = adminCache.workshops;
+
+  if (workshops.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 32px; color: var(--color-gray-500);">
+          No hay talleres publicados todavía.
+        </td>
+      </tr>`;
+    return;
+  }
 
   tableBody.innerHTML = workshops.map(w => {
     const regs = w.registrations || [];
@@ -71,7 +89,7 @@ export function renderGeoDistribution() {
   const container = document.getElementById('geoDistributionList');
   if (!container) return;
 
-  const distribution = getAttendeeStateDistribution();
+  const distribution = getStateDistribution(adminCache.enrollments);
 
   if (distribution.length === 0) {
     container.innerHTML = `<p style="color: var(--color-gray-500); font-size: 0.85rem;">No hay registros de asistentes todavía.</p>`;
@@ -120,14 +138,11 @@ function bindWorkshopEvents() {
     const deleteBtn = e.target.closest('.btn-delete-workshop');
 
     if (viewAttendeesBtn) {
-      const id = parseInt(viewAttendeesBtn.dataset.id, 10);
-      openAttendeesModal(id);
+      openAttendeesModal(viewAttendeesBtn.dataset.id);
     } else if (editBtn) {
-      const id = parseInt(editBtn.dataset.id, 10);
-      openEditWorkshopModal(id);
+      openEditWorkshopModal(editBtn.dataset.id);
     } else if (deleteBtn) {
-      const id = parseInt(deleteBtn.dataset.id, 10);
-      deleteWorkshop(id);
+      deleteWorkshop(deleteBtn.dataset.id);
     }
   });
 
@@ -138,8 +153,7 @@ function bindWorkshopEvents() {
 }
 
 function openAttendeesModal(workshopId) {
-  const workshops = getAdminWorkshops();
-  const workshop = workshops.find(w => w.id === workshopId);
+  const workshop = adminCache.workshops.find(w => w.id === workshopId);
   if (!workshop) return;
 
   const modal = document.getElementById('attendeesModal');
@@ -157,7 +171,7 @@ function openAttendeesModal(workshopId) {
         <td><strong>#${i + 1}</strong></td>
         <td>
           <strong>${r.fullName}</strong>
-          <div style="font-size: 0.75rem; color: var(--color-gray-500);">${r.email} • ${r.phone}</div>
+          <div style="font-size: 0.75rem; color: var(--color-gray-500);">${r.email} • ${r.phone || 'Sin teléfono'}</div>
         </td>
         <td><span style="font-weight: 600; color: var(--color-forest);">${r.stateName || 'N/D'}</span></td>
         <td><span style="font-size: 0.8rem; color: var(--color-gray-500);">${r.registeredAt}</span></td>
@@ -174,8 +188,7 @@ function openAttendeesModal(workshopId) {
 }
 
 function openEditWorkshopModal(workshopId) {
-  const workshops = getAdminWorkshops();
-  const w = workshops.find(item => item.id === workshopId);
+  const w = adminCache.workshops.find(item => item.id === workshopId);
   if (!w) return;
 
   currentEditingWorkshopId = workshopId;
@@ -194,62 +207,70 @@ function openEditWorkshopModal(workshopId) {
   modal?.classList.add('active');
 }
 
-function saveWorkshopFromForm() {
-  const workshops = getAdminWorkshops();
+async function saveWorkshopFromForm() {
   const title = document.getElementById('workshopTitle').value.trim();
   const type = document.getElementById('workshopType').value;
   const date = document.getElementById('workshopDate').value;
-  const time = document.getElementById('workshopTime').value.trim();
+  const time = document.getElementById('workshopTime').value.trim() || '09:00';
   const location = document.getElementById('workshopLocation').value.trim();
   const price = parseFloat(document.getElementById('workshopPrice').value) || 0;
   const maxCapacity = parseInt(document.getElementById('workshopCapacity').value, 10) || 20;
   const description = document.getElementById('workshopDesc').value.trim();
 
-  if (currentEditingWorkshopId) {
-    const index = workshops.findIndex(w => w.id === currentEditingWorkshopId);
-    if (index !== -1) {
-      workshops[index].title = title;
-      workshops[index].type = type;
-      workshops[index].date = date;
-      workshops[index].time = time;
-      workshops[index].location = location;
-      workshops[index].price = price;
-      workshops[index].maxCapacity = maxCapacity;
-      workshops[index].description = description;
-      saveAdminWorkshops(workshops);
-      showToast("Taller actualizado exitosamente.");
-    }
-  } else {
-    const newWorkshop = {
-      id: Date.now(),
-      title,
-      slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      type,
-      date,
-      time,
-      location,
-      price,
-      maxCapacity,
-      description,
-      status: 'PUBLISHED',
-      registrations: []
-    };
-    workshops.unshift(newWorkshop);
-    saveAdminWorkshops(workshops);
-    showToast("¡Nuevo taller publicado en la plataforma!");
+  if (!title) {
+    showToast('El título del taller es obligatorio.');
+    return;
+  }
+  if (!date || isNaN(new Date(`${date}T${time}:00`).getTime())) {
+    showToast('La fecha del taller no es válida.');
+    return;
+  }
+  if (price < 0 || maxCapacity < 1) {
+    showToast('El precio no puede ser negativo y el cupo debe ser al menos 1.');
+    return;
   }
 
-  document.getElementById('workshopModal')?.classList.remove('active');
-  renderWorkshopsTable();
-  renderGeoDistribution();
-}
+  const payload = {
+    title,
+    scheduledDate: new Date(`${date}T${time}:00`).toISOString(),
+    capacity: maxCapacity,
+    price,
+    description,
+    modality: type === 'ONLINE' ? 'Online' : 'Presencial',
+    location
+  };
 
-function deleteWorkshop(id) {
-  if (confirm("¿Estás seguro de que deseas eliminar este taller?")) {
-    const workshops = getAdminWorkshops().filter(w => w.id !== id);
-    saveAdminWorkshops(workshops);
-    showToast("Taller eliminado.");
+  try {
+    const url = currentEditingWorkshopId ? `/api/workshops/${currentEditingWorkshopId}` : '/api/workshops';
+    const res = await apiFetch(url, {
+      method: currentEditingWorkshopId ? 'PUT' : 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message);
+
+    showToast(currentEditingWorkshopId ? 'Taller actualizado exitosamente.' : '¡Nuevo taller publicado en la plataforma!');
+    document.getElementById('workshopModal')?.classList.remove('active');
+    await loadWorkshops(true);
     renderWorkshopsTable();
     renderGeoDistribution();
+  } catch (error) {
+    console.error('Error guardando taller:', error);
+    showToast(error.message || 'No se pudo guardar el taller.');
+  }
+}
+
+async function deleteWorkshop(id) {
+  if (!confirm('¿Estás seguro de que deseas eliminar este taller?')) return;
+
+  try {
+    const res = await apiFetch(`/api/workshops/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message);
+    showToast('Taller eliminado.');
+    await loadWorkshops(true);
+    renderWorkshopsTable();
+    renderGeoDistribution();
+  } catch (error) {
+    console.error('Error eliminando taller:', error);
+    showToast('No se pudo eliminar el taller.');
   }
 }

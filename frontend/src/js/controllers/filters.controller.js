@@ -5,7 +5,6 @@
 
 export function initFilters() {
   const filterBtns = document.querySelectorAll('.filter-btn');
-  const productCards = document.querySelectorAll('.product-card');
 
   if (filterBtns.length === 0) return;
 
@@ -16,7 +15,8 @@ export function initFilters() {
       filterBtns.forEach(b => b.classList.remove('active'));
       this.classList.add('active');
 
-      productCards.forEach(card => {
+      // Se consulta en cada click porque el grid se renderiza de forma dinámica
+      document.querySelectorAll('.product-card').forEach(card => {
         const category = card.dataset.category;
         const show = filter === 'todos' || category === filter;
 

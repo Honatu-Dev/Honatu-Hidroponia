@@ -3,13 +3,17 @@ import {
   getWorkshops,
   enrollWorkshop,
   getMyEnrollments,
-  createWorkshop
+  createWorkshop,
+  updateWorkshop,
+  deleteWorkshop,
+  getAllEnrollments
 } from '../controllers/workshops.controller.js';
 import { optionalAuth, requireAuth, requireAdmin } from '../middlewares/auth.middleware.js';
 import { handleValidationErrors } from '../middlewares/validate.js';
 import {
   enrollWorkshopValidator,
-  createWorkshopValidator
+  createWorkshopValidator,
+  updateWorkshopValidator
 } from '../middlewares/validators/workshops.validator.js';
 
 const router = express.Router();
@@ -172,5 +176,53 @@ router.post('/enroll', optionalAuth, enrollWorkshopValidator, handleValidationEr
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/', requireAuth, requireAdmin, createWorkshopValidator, handleValidationErrors, createWorkshop);
+
+/**
+ * @openapi
+ * /api/workshops/admin/enrollments:
+ *   get:
+ *     summary: Obtener todas las inscripciones a talleres (Solo Administradores)
+ *     tags: [Workshops]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista completa de inscripciones
+ *       403:
+ *         description: Acceso denegado
+ */
+router.get('/admin/enrollments', requireAuth, requireAdmin, getAllEnrollments);
+
+/**
+ * @openapi
+ * /api/workshops/{id}:
+ *   put:
+ *     summary: Actualizar un taller (Solo Administradores)
+ *     tags: [Workshops]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Taller actualizado
+ *       404:
+ *         description: Taller no encontrado
+ */
+router.put('/:id', requireAuth, requireAdmin, updateWorkshopValidator, handleValidationErrors, updateWorkshop);
+
+/**
+ * @openapi
+ * /api/workshops/{id}:
+ *   delete:
+ *     summary: Eliminar un taller (Solo Administradores)
+ *     tags: [Workshops]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Taller eliminado
+ *       404:
+ *         description: Taller no encontrado
+ */
+router.delete('/:id', requireAuth, requireAdmin, deleteWorkshop);
 
 export default router;

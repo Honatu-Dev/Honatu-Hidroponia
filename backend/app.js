@@ -10,7 +10,12 @@ import { setupSwagger } from './src/config/swagger.js';
 // Rutas
 import authRoutes from './src/routes/auth.routes.js';
 import workshopsRoutes from './src/routes/workshops.routes.js';
-// import productRoutes from './src/routes/product.routes.js';
+import serviceRequestsRoutes from './src/routes/serviceRequests.routes.js';
+import productsRoutes from './src/routes/products.routes.js';
+import ordersRoutes from './src/routes/orders.routes.js';
+import cartRoutes from './src/routes/cart.routes.js';
+import guidesRoutes from './src/routes/guides.routes.js';
+import siteConfigRoutes from './src/routes/siteConfig.routes.js';
 
 dotenv.config();
 
@@ -72,7 +77,12 @@ setupSwagger(app);
 // Middlewares de rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/workshops', workshopsRoutes);
-// app.use('/api/productos', productRoutes);
+app.use('/api/service-requests', serviceRequestsRoutes);
+app.use('/api/products', productsRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/guides', guidesRoutes);
+app.use('/api/site-config', siteConfigRoutes);
 
 /**
  * @openapi

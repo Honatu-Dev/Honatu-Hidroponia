@@ -397,23 +397,73 @@
         // Booking form submit
         const bookingForm = document.getElementById('bookingForm');
         if (bookingForm) {
-          bookingForm.addEventListener('submit', (e) => {
+          bookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!selectedDate || !selectedTime) return;
+
+            const submitBtn = document.getElementById('bookSubmitBtn');
+            const originalHTML = submitBtn.innerHTML;
 
             const dayName = DAYS[selectedDate.getDay()];
             const monthName = MONTHS[selectedDate.getMonth()];
             const dateStr = `${dayName} ${selectedDate.getDate()} de ${monthName}, ${currentYear}`;
 
-            if (window.showToast) {
-              window.showToast(`¡Cita agendada! ${dateStr} a las ${selectedTime}. Te contactaremos para confirmar.`);
+            // Convierte "9:30 am" / "1:00 pm" a hora de 24h y arma la fecha ISO
+            const timeMatch = selectedTime.match(/(\d+):(\d+)\s*(am|pm)/i);
+            let hours = timeMatch ? parseInt(timeMatch[1], 10) : 9;
+            const minutes = timeMatch ? parseInt(timeMatch[2], 10) : 0;
+            if (timeMatch && timeMatch[3].toLowerCase() === 'pm' && hours !== 12) hours += 12;
+            if (timeMatch && timeMatch[3].toLowerCase() === 'am' && hours === 12) hours = 0;
+            const requestedDate = new Date(selectedDate);
+            requestedDate.setHours(hours, minutes, 0, 0);
+
+            const typeSelect = document.getElementById('book-type');
+            const typeLabel = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : '';
+            const notes = document.getElementById('book-notes')?.value.trim() || '';
+
+            const payload = {
+              serviceType: 'asesoria',
+              requestedDate: requestedDate.toISOString(),
+              location: document.getElementById('book-location')?.value.trim() || '',
+              details: `Tipo de asesoría: ${typeLabel}${notes ? `\nNotas: ${notes}` : ''}`,
+              guestName: document.getElementById('book-name')?.value.trim() || '',
+              guestEmail: document.getElementById('book-email')?.value.trim() || '',
+              guestPhone: document.getElementById('book-phone')?.value.trim() || ''
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Agendando...';
+
+            try {
+              const { apiFetch } = await import('../../js/config.js');
+              const response = await apiFetch('/api/service-requests', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+              });
+
+              if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.message || 'No se pudo agendar la cita.');
+              }
+
+              if (window.showToast) {
+                window.showToast(`¡Cita agendada! ${dateStr} a las ${selectedTime}. Te contactaremos para confirmar.`);
+              }
+              bookingForm.reset();
+              selectedDate = null;
+              selectedTime = null;
+              renderCalendar();
+              renderTimeSlots();
+              updateSummary();
+              submitBtn.innerHTML = originalHTML;
+            } catch (error) {
+              console.error('Error agendando cita:', error);
+              if (window.showToast) {
+                window.showToast(error.message || 'No se pudo agendar la cita. Intenta de nuevo más tarde.', 'error');
+              }
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = originalHTML;
             }
-            bookingForm.reset();
-            selectedDate = null;
-            selectedTime = null;
-            renderCalendar();
-            renderTimeSlots();
-            updateSummary();
           });
         }
       });

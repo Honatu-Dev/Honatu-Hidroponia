@@ -3,13 +3,19 @@
    CRUD, Variants & Inventory Management
    ============================================ */
 
-import { getAdminProducts, saveAdminProducts } from '../data/admin-mock-data.js';
+import { apiFetch } from '../../config.js';
+import { adminCache, loadProducts } from '../data/admin-api.js';
 import { showToast } from '../../middleware/toast.middleware.js';
 
 let currentEditingProductId = null;
 
 export function initAdminProducts() {
-  renderProductsTable();
+  loadProducts()
+    .then(() => renderProductsTable())
+    .catch(err => {
+      console.error('Error cargando productos:', err);
+      showToast('No se pudieron cargar los productos del servidor.', 'error');
+    });
   bindProductEvents();
 }
 
@@ -17,11 +23,11 @@ export function renderProductsTable(filterText = '', filterCategory = 'all') {
   const tableBody = document.getElementById('adminProductsTableBody');
   if (!tableBody) return;
 
-  const products = getAdminProducts();
+  const products = adminCache.products;
   const searchLower = filterText.toLowerCase();
 
   const filtered = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchLower) || 
+    const matchesSearch = p.name.toLowerCase().includes(searchLower) ||
                           p.category.toLowerCase().includes(searchLower) ||
                           (p.variants || []).some(v => v.sku.toLowerCase().includes(searchLower));
     const matchesCat = filterCategory === 'all' || p.category === filterCategory;
@@ -48,7 +54,7 @@ export function renderProductsTable(filterText = '', filterCategory = 'all') {
       <tr>
         <td>
           <div class="product-row-info">
-            <img src="${product.coverImage || 'https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?w=100'}" alt="${product.name}" class="product-thumb">
+            <img src="${product.coverImage}" alt="${product.name}" class="product-thumb">
             <div>
               <strong>${product.name}</strong>
               <div style="font-size: 0.75rem; color: var(--color-gray-500);">${mainVariant.sku} • ${variantsCount} variante(s)</div>
@@ -119,14 +125,11 @@ function bindProductEvents() {
     const deleteBtn = e.target.closest('.btn-delete-product');
 
     if (editBtn) {
-      const id = parseInt(editBtn.dataset.id, 10);
-      openEditProductModal(id);
+      openEditProductModal(editBtn.dataset.id);
     } else if (toggleBtn) {
-      const id = parseInt(toggleBtn.dataset.id, 10);
-      toggleProductStatus(id);
+      toggleProductStatus(toggleBtn.dataset.id);
     } else if (deleteBtn) {
-      const id = parseInt(deleteBtn.dataset.id, 10);
-      deleteProduct(id);
+      deleteProduct(deleteBtn.dataset.id);
     }
   });
 
@@ -138,8 +141,7 @@ function bindProductEvents() {
 }
 
 function openEditProductModal(id) {
-  const products = getAdminProducts();
-  const product = products.find(p => p.id === id);
+  const product = adminCache.products.find(p => p.id === id);
   if (!product) return;
 
   currentEditingProductId = id;
@@ -159,71 +161,97 @@ function openEditProductModal(id) {
   modal?.classList.add('active');
 }
 
-function saveProductFromForm() {
-  const products = getAdminProducts();
+async function saveProductFromForm() {
   const name = document.getElementById('prodName').value.trim();
   const category = document.getElementById('prodCategory').value;
   const description = document.getElementById('prodDescription').value.trim();
-  const coverImage = document.getElementById('prodImage').value.trim() || 'https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?w=600';
+  const coverImage = document.getElementById('prodImage').value.trim();
   const sku = document.getElementById('prodSku').value.trim() || `HON-${Date.now().toString().slice(-4)}`;
   const price = parseFloat(document.getElementById('prodPrice').value) || 0;
   const stock = parseInt(document.getElementById('prodStock').value, 10) || 0;
 
-  if (currentEditingProductId) {
-    const index = products.findIndex(p => p.id === currentEditingProductId);
-    if (index !== -1) {
-      products[index].name = name;
-      products[index].category = category;
-      products[index].description = description;
-      products[index].coverImage = coverImage;
-      if (!products[index].variants || products[index].variants.length === 0) {
-        products[index].variants = [{ id: Date.now(), sku, price, stock, name: 'Principal' }];
-      } else {
-        products[index].variants[0].sku = sku;
-        products[index].variants[0].price = price;
-        products[index].variants[0].stock = stock;
+  if (!name) {
+    showToast('El nombre del producto es obligatorio.');
+    return;
+  }
+  if (price < 0 || stock < 0) {
+    showToast('El precio y el stock no pueden ser negativos.');
+    return;
+  }
+
+  try {
+    if (currentEditingProductId) {
+      const product = adminCache.products.find(p => p.id === currentEditingProductId);
+      if (!product) return;
+
+      const res = await apiFetch(`/api/products/${currentEditingProductId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ name, category, description, imageUrl: coverImage || undefined })
+      });
+      if (!res.ok) throw new Error((await res.json()).message);
+
+      const variant = product.variants?.[0];
+      if (variant?.id) {
+        await apiFetch(`/api/products/variants/${variant.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ price, stock, imageUrls: coverImage ? [coverImage] : undefined })
+        });
       }
-      saveAdminProducts(products);
-      showToast("Producto actualizado exitosamente.");
+      showToast('Producto actualizado exitosamente.');
+    } else {
+      const res = await apiFetch('/api/products', {
+        method: 'POST',
+        body: JSON.stringify({
+          name,
+          category,
+          description,
+          imageUrl: coverImage || undefined,
+          variants: [{ sku, price, stock, imageUrls: coverImage ? [coverImage] : [] }]
+        })
+      });
+      if (!res.ok) throw new Error((await res.json()).message);
+      showToast('¡Nuevo producto agregado al catálogo!');
     }
-  } else {
-    const newProd = {
-      id: Date.now(),
-      name,
-      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      category,
-      description,
-      coverImage,
-      isActive: true,
-      variants: [
-        { id: Date.now() + 1, sku, name: 'Estándar', price, discountPrice: price, stock, weight: 1.0 }
-      ]
-    };
-    products.unshift(newProd);
-    saveAdminProducts(products);
-    showToast("¡Nuevo producto agregado al catálogo!");
-  }
 
-  document.getElementById('productModal')?.classList.remove('active');
-  renderProductsTable();
-}
-
-function toggleProductStatus(id) {
-  const products = getAdminProducts();
-  const prod = products.find(p => p.id === id);
-  if (prod) {
-    prod.isActive = !prod.isActive;
-    saveAdminProducts(products);
-    showToast(`Producto ${prod.isActive ? 'activado' : 'pausado'} correctamente.`);
+    document.getElementById('productModal')?.classList.remove('active');
+    await loadProducts(true);
     renderProductsTable();
+  } catch (error) {
+    console.error('Error guardando producto:', error);
+    showToast(error.message || 'No se pudo guardar el producto.', 'error');
   }
 }
 
-function deleteProduct(id) {
-  if (confirm("¿Estás seguro de que deseas eliminar este producto?")) {
-    const products = getAdminProducts().filter(p => p.id !== id);
-    saveAdminProducts(products);
-    showToast("Producto eliminado del catálogo.");
+async function toggleProductStatus(id) {
+  const prod = adminCache.products.find(p => p.id === id);
+  if (!prod) return;
+
+  try {
+    const res = await apiFetch(`/api/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ isActive: !prod.isActive })
+    });
+    if (!res.ok) throw new Error((await res.json()).message);
+    showToast(`Producto ${!prod.isActive ? 'activado' : 'pausado'} correctamente.`);
+    await loadProducts(true);
     renderProductsTable();
+  } catch (error) {
+    console.error('Error cambiando estado:', error);
+    showToast('No se pudo cambiar el estado del producto.', 'error');
+  }
+}
+
+async function deleteProduct(id) {
+  if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
+
+  try {
+    const res = await apiFetch(`/api/products/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error((await res.json()).message);
+    showToast('Producto eliminado del catálogo.');
+    await loadProducts(true);
+    renderProductsTable();
+  } catch (error) {
+    console.error('Error eliminando producto:', error);
+    showToast('No se pudo eliminar el producto.', 'error');
   }
 }

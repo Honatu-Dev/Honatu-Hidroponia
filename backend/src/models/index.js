@@ -11,6 +11,8 @@ import OrderItem from './OrderItem.js';
 import ServiceRequest from './ServiceRequest.js';
 import Workshop from './Workshop.js';
 import WorkshopEnrollment from './WorkshopEnrollment.js';
+import Guide from './Guide.js';
+import SiteConfig from './SiteConfig.js';
 
 // ---- ASSOCIATIONS ----
 
@@ -64,5 +66,7 @@ export {
   OrderItem,
   ServiceRequest,
   Workshop,
-  WorkshopEnrollment
+  WorkshopEnrollment,
+  Guide,
+  SiteConfig
 };

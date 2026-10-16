@@ -197,6 +197,152 @@
     </div>
   </aside>
 
+  <script type="module">
+    import { apiFetch } from '../../js/config.js';
+    import { bindAddToCartButtons } from '../../js/controllers/cart.controller.js';
+    import { getCloudinaryUrl } from '../../js/services/cloudinary.service.js';
+
+    const productId = new URLSearchParams(window.location.search).get('id');
+    if (productId) {
+      const escapeHtml = (str) => String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+      const formatPrice = (v) => '$' + Number(v || 0).toLocaleString('es-MX') + ' <small>MXN</small>';
+
+      const applyVariant = (product, variant) => {
+        const info = document.querySelector('.product-info');
+        const addBtn = document.querySelector('.btn-add-cart-lg');
+        const img = variant?.imageUrls?.[0] || product.imageUrl || '';
+
+        document.querySelector('.product-price-lg').innerHTML = formatPrice(variant?.price);
+        document.querySelector('.product-meta').innerHTML = `
+          <p><strong>SKU:</strong> ${escapeHtml(variant?.sku || 'N/D')}</p>
+          <p><strong>Disponibilidad:</strong> ${(variant?.stock ?? 0) > 0
+            ? '<span style="color: var(--color-forest); font-weight: 600;">En Stock (Apto para envío inmediato)</span>'
+            : '<span style="color: var(--color-terracotta); font-weight: 600;">Agotado temporalmente</span>'}
+          </p>`;
+
+        const mainImg = document.querySelector('.product-gallery .main-image');
+        if (mainImg && img) mainImg.src = img;
+
+        if (info && addBtn) {
+          info.dataset.id = variant?.id || '';
+          info.dataset.name = product.name;
+          info.dataset.price = variant?.price || 0;
+          info.dataset.img = img;
+          addBtn.dataset.productId = variant?.id || '';
+          addBtn.dataset.name = product.name;
+          addBtn.dataset.price = variant?.price || 0;
+          addBtn.dataset.img = img;
+          addBtn.disabled = !variant?.id || (variant.stock ?? 0) <= 0;
+          addBtn.textContent = addBtn.disabled ? 'Agotado temporalmente' : 'Agregar al Carrito';
+        }
+      };
+
+      const renderThumbs = (images) => {
+        const grid = document.querySelector('.thumbnail-grid');
+        if (!grid || images.length === 0) return;
+        grid.innerHTML = images.map((src, i) =>
+          `<img src="${src}" alt="Vista ${i + 1}"${i === 0 ? ' class="active"' : ''}>`
+        ).join('');
+        grid.querySelectorAll('img').forEach(thumb => {
+          thumb.addEventListener('click', () => {
+            grid.querySelectorAll('img').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+            const mainImg = document.querySelector('.product-gallery .main-image');
+            if (mainImg) mainImg.src = thumb.src;
+          });
+        });
+      };
+
+      const renderRelated = (products, currentId) => {
+        const grid = document.querySelector('.related-products .shop-grid');
+        if (!grid) return;
+        const related = products.filter(p => p.id !== currentId).slice(0, 3);
+        if (related.length === 0) {
+          document.querySelector('.related-products')?.remove();
+          return;
+        }
+        grid.innerHTML = related.map(p => {
+          const v = (p.ProductVariants || [])[0] || {};
+          const img = p.imageUrl || v.imageUrls?.[0] || '';
+          return `
+            <article class="product-card">
+              <a href="../shop/product.html?id=${p.id}" class="product-img-wrap">
+                <img src="${img}" alt="${escapeHtml(p.name)}" loading="lazy">
+              </a>
+              <div class="product-body">
+                <span class="product-category">${escapeHtml(p.category || '')}</span>
+                <h3 class="product-name">${escapeHtml(p.name)}</h3>
+                <p class="product-desc">${escapeHtml(p.description || '')}</p>
+                <div class="product-footer">
+                  <span class="product-price">${formatPrice(v.price)}</span>
+                  <a href="../shop/product.html?id=${p.id}" class="btn btn-secondary btn-sm">Ver Detalles</a>
+                </div>
+              </div>
+            </article>`;
+        }).join('');
+      };
+
+      (async () => {
+      try {
+        const [productRes, allRes] = await Promise.all([
+          apiFetch(`/api/products/${productId}`),
+          apiFetch('/api/products')
+        ]);
+
+        if (!productRes.ok) {
+          document.querySelector('.product-layout').innerHTML =
+            '<p style="padding: var(--space-3xl) 0; text-align: center; width: 100%;">Producto no encontrado o no disponible.</p>';
+        } else {
+          const product = await productRes.json();
+          const variants = product.ProductVariants || [];
+          let selectedVariant = variants[0] || null;
+
+          const breadcrumb = document.querySelector('.breadcrumb span');
+          if (breadcrumb) breadcrumb.textContent = product.name;
+          const catEl = document.querySelector('.product-info .product-category');
+          if (catEl) catEl.textContent = (product.category || '').toUpperCase();
+          const titleEl = document.querySelector('.product-title');
+          if (titleEl) titleEl.textContent = product.name;
+          const descEl = document.querySelector('.product-description');
+          if (descEl) descEl.textContent = product.description || '';
+
+          const images = [
+            ...(selectedVariant?.imageUrls || []),
+            ...(product.imageUrl ? [product.imageUrl] : [])
+          ].filter((v, i, a) => a.indexOf(v) === i);
+          renderThumbs(images);
+          applyVariant(product, selectedVariant);
+
+          // Selector de variante cuando hay más de una opción
+          if (variants.length > 1) {
+            const actions = document.querySelector('.product-actions');
+            const select = document.createElement('select');
+            select.className = 'form-input';
+            select.style.marginBottom = 'var(--space-md)';
+            select.innerHTML = variants.map(v =>
+              `<option value="${v.id}">${escapeHtml(v.sku)} — $${Number(v.price).toLocaleString('es-MX')} MXN</option>`
+            ).join('');
+            select.addEventListener('change', () => {
+              selectedVariant = variants.find(v => v.id === select.value) || variants[0];
+              applyVariant(product, selectedVariant);
+            });
+            actions?.parentNode.insertBefore(select, actions);
+          }
+
+          if (allRes.ok) {
+            renderRelated(await allRes.json(), product.id);
+          }
+        }
+      } catch (error) {
+        console.error('Error cargando producto:', error);
+      }
+      })();
+
+      bindAddToCartButtons();
+    }
+  </script>
+
 </body>
 
 </html>

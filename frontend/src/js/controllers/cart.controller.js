@@ -7,13 +7,14 @@ import { getItem, setItem, StorageKeys } from '../middleware/storage.middleware.
 import { getCloudinaryUrl } from '../services/cloudinary.service.js';
 import { showToast } from '../middleware/toast.middleware.js';
 import { escapeHtml, escapeAttr } from '../utils/dom.js';
+import { apiFetch } from '../config.js';
 
 const SVG_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
 let cart = getItem(StorageKeys.CART, []);
 
 function parsePrice(priceStr) {
-  return parseInt(String(priceStr).replace(/[^0-9]/g, ''), 10) || 0;
+  return parseFloat(String(priceStr).replace(/[^0-9.]/g, '')) || 0;
 }
 
 function calcTotal() {
@@ -82,6 +83,78 @@ export function addToCart(id, name, price, img) {
   renderCart();
 }
 
+// Vincula los botones "Agregar al carrito" (idempotente, puede llamarse tras render dinámico)
+export function bindAddToCartButtons() {
+  document.querySelectorAll('.btn-add-cart, .btn-add-cart-lg').forEach(btn => {
+    if (btn.dataset.cartBound) return;
+    btn.dataset.cartBound = 'true';
+
+    btn.addEventListener('click', function () {
+      const card = this.closest('.product-card') || this.closest('.product-info');
+      if (!card) return;
+
+      const id = card.dataset.id || this.dataset.productId;
+      const name = card.dataset.name || this.dataset.name || (card.querySelector('.product-name') ? card.querySelector('.product-name').textContent.trim() : 'Producto');
+      const price = card.dataset.price || this.dataset.price;
+      const img = card.dataset.img || this.dataset.img;
+
+      addToCart(id, name, price, img);
+
+      showToast(`¡"${escapeHtml(name)}" agregado al carrito con éxito!`);
+
+      this.classList.add('added');
+      const originalHTML = this.innerHTML;
+      this.innerHTML = SVG_CHECK;
+      setTimeout(() => {
+        this.classList.remove('added');
+        this.innerHTML = originalHTML;
+      }, 1200);
+    });
+  });
+}
+
+// Sincroniza el carrito local con el servidor cuando hay sesión activa
+async function syncCartWithServer() {
+  if (!localStorage.getItem('honatu_token')) return;
+
+  try {
+    const res = await apiFetch('/api/cart');
+    if (!res.ok) return;
+    const serverItems = await res.json();
+
+    // Merge: unión de artículos; ante duplicados gana la cantidad mayor
+    const merged = new Map();
+    serverItems.forEach(i => merged.set(i.productVariantId, i.quantity));
+    cart.forEach(i => {
+      const prev = merged.get(i.id) || 0;
+      merged.set(i.id, Math.max(prev, i.qty));
+    });
+
+    const syncRes = await apiFetch('/api/cart/sync', {
+      method: 'PUT',
+      body: JSON.stringify({
+        items: [...merged.entries()].map(([productVariantId, quantity]) => ({ productVariantId, quantity }))
+      })
+    });
+    if (!syncRes.ok) return;
+
+    const synced = await syncRes.json();
+    cart = synced
+      .filter(i => i.ProductVariant && i.ProductVariant.Product)
+      .map(i => ({
+        id: i.productVariantId,
+        name: i.ProductVariant.Product.name,
+        price: parseFloat(i.ProductVariant.price),
+        img: i.ProductVariant.imageUrls?.[0] || i.ProductVariant.Product.imageUrl || '',
+        qty: i.quantity
+      }));
+
+    renderCart();
+  } catch (error) {
+    console.warn('No se pudo sincronizar el carrito:', error);
+  }
+}
+
 export function initCart() {
   const cartPanel = document.getElementById('cartPanel');
   const cartOverlay = document.getElementById('cartOverlay');
@@ -131,29 +204,7 @@ export function initCart() {
   });
 
   // Add to cart buttons
-  document.querySelectorAll('.btn-add-cart, .btn-add-cart-lg').forEach(btn => {
-    btn.addEventListener('click', function () {
-      const card = this.closest('.product-card') || this.closest('.product-info');
-      if (!card) return;
-
-      const id = card.dataset.id || this.dataset.productId;
-      const name = card.dataset.name || this.dataset.name || (card.querySelector('.product-name') ? card.querySelector('.product-name').textContent.trim() : 'Producto');
-      const price = card.dataset.price || this.dataset.price;
-      const img = card.dataset.img || this.dataset.img;
-
-      addToCart(id, name, price, img);
-
-      showToast(`¡"${escapeHtml(name)}" agregado al carrito con éxito!`);
-
-      this.classList.add('added');
-      const originalHTML = this.innerHTML;
-      this.innerHTML = SVG_CHECK;
-      setTimeout(() => {
-        this.classList.remove('added');
-        this.innerHTML = originalHTML;
-      }, 1200);
-    });
-  });
+  bindAddToCartButtons();
 
   // Keyboard: Escape closes cart
   document.addEventListener('keydown', (e) => {
@@ -162,5 +213,8 @@ export function initCart() {
     }
   });
 
+  window.addEventListener('honatu:auth:login', syncCartWithServer);
+
   renderCart();
+  syncCartWithServer();
 }
