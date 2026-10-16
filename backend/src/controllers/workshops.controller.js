@@ -18,6 +18,7 @@ export const enrollWorkshop = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { workshopId, guestName, guestEmail, guestPhone } = req.body;
+    console.log('[WORKSHOP] Enrolling to workshop:', { workshopId, guestName, userId: req.user?.id });
 
     // Verificar si el taller existe y bloquear la fila para evitar sobreinscripción
     const workshop = await Workshop.findByPk(workshopId, {
@@ -26,6 +27,7 @@ export const enrollWorkshop = async (req, res) => {
     });
     if (!workshop) {
       await transaction.rollback();
+      console.log('[WORKSHOP] ERROR_NOT_FOUND:', workshopId);
       return res.status(404).json({ message: 'Taller no encontrado' });
     }
 
@@ -34,8 +36,10 @@ export const enrollWorkshop = async (req, res) => {
       where: { workshopId },
       transaction
     });
+    console.log('[WORKSHOP] Enrollment count:', enrolledCount, 'of', workshop.capacity);
     if (enrolledCount >= workshop.capacity) {
       await transaction.rollback();
+      console.log('[WORKSHOP] ERROR_FULL: Workshop is at capacity');
       return res.status(400).json({ message: 'El taller ya está lleno' });
     }
 
@@ -48,6 +52,7 @@ export const enrollWorkshop = async (req, res) => {
     // Si no, usamos los datos de invitado
     if (req.user && req.user.id) {
       enrollmentData.userId = req.user.id;
+      console.log('[WORKSHOP] SUCCESS: Authenticated user enrollment:', req.user.id);
 
       // Validar que no esté ya registrado
       const existing = await WorkshopEnrollment.findOne({
@@ -56,12 +61,14 @@ export const enrollWorkshop = async (req, res) => {
       });
       if (existing) {
         await transaction.rollback();
+        console.log('[WORKSHOP] ERROR_ALREADY_ENROLLED: User already enrolled');
         return res.status(400).json({ message: 'Ya estás inscrito a este taller' });
       }
     } else {
       // Es un invitado, requerimos sus datos
       if (!guestName || !guestEmail) {
         await transaction.rollback();
+        console.log('[WORKSHOP] ERROR_VALIDATION: Missing guest data');
         return res.status(400).json({ message: 'Para inscribirte sin cuenta, requerimos tu nombre y correo' });
       }
 

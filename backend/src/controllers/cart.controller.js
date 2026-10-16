@@ -25,9 +25,11 @@ export const addCartItem = async (req, res) => {
   try {
     const { productVariantId } = req.body;
     const quantity = req.body.quantity || 1;
+    console.log('[CART] Adding to cart:', { userId: req.user.id, productVariantId, quantity });
 
     const variant = await ProductVariant.findByPk(productVariantId, { include: [{ model: Product }] });
     if (!variant || !variant.Product?.isActive) {
+      console.log('[CART] ERROR_PRODUCT_UNAVAILABLE:', productVariantId);
       return res.status(404).json({ message: 'Producto no disponible' });
     }
 
@@ -39,12 +41,15 @@ export const addCartItem = async (req, res) => {
     if (!created) {
       item.quantity += quantity;
       await item.save();
+      console.log('[CART] SUCCESS: Quantity updated:', { itemId: item.id, newQuantity: item.quantity });
+    } else {
+      console.log('[CART] SUCCESS: New item added:', { itemId: item.id, quantity });
     }
 
     const full = await CartItem.findByPk(item.id, { include: [includeVariant] });
     res.status(created ? 201 : 200).json({ message: 'Artículo agregado al carrito', item: full });
   } catch (error) {
-    console.error('Error in addCartItem:', error);
+    console.error('[CART] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al agregar al carrito.' });
   }
 };

@@ -5,7 +5,8 @@ import { getPagination, pagedResponse } from '../middlewares/pagination.js';
 //    Sin parámetros devuelve arreglo completo; con ?page&limit devuelve { items, total, page, pages }
 export const getProducts = async (req, res) => {
   try {
-    const where = req.user && req.user.role === 'ADMIN' ? {} : { isActive: true };
+    const isAdmin = req.user?.role === 'ADMIN';
+    const where = isAdmin ? {} : { isActive: true };
     const pagination = getPagination(req);
 
     if (pagination) {
@@ -53,11 +54,13 @@ export const createProduct = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { name, description, category, imageUrl, isActive, variants } = req.body;
+    console.log('[PRODUCT] Creating product:', { name, category, isActive });
 
     const product = await Product.create(
       { name, description, category, imageUrl, isActive },
       { transaction }
     );
+    console.log('[PRODUCT] SUCCESS: Product created:', product.id);
 
     if (Array.isArray(variants) && variants.length > 0) {
       await ProductVariant.bulkCreate(

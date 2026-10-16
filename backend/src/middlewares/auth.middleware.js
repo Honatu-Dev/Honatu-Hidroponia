@@ -13,14 +13,17 @@ const extractToken = (req) => {
 export const requireAuth = (req, res, next) => {
   const token = extractToken(req);
   if (!token) {
+    console.log('[AUTH] ERROR_NO_TOKEN:', req.method, req.path);
     return res.status(401).json({ message: 'No se proporcionó token de autenticación' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // { id, email, role }
+    console.log('[AUTH] SUCCESS: User authenticated:', { email: decoded.email, role: decoded.role, path: req.path });
     next();
   } catch (error) {
+    console.log('[AUTH] ERROR_INVALID_TOKEN:', error.message);
     return res.status(401).json({ message: 'Token inválido o expirado' });
   }
 };

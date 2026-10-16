@@ -6,6 +6,9 @@ export const createOrder = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { items, shippingAddress } = req.body;
+    console.log('[ORDER] Creating order for user:', req.user.id);
+    console.log('[ORDER] Items:', items);
+    console.log('[ORDER] Shipping address:', shippingAddress);
 
     let totalAmount = 0;
     const orderItemsData = [];
@@ -19,11 +22,13 @@ export const createOrder = async (req, res) => {
 
       if (!variant || !variant.Product || !variant.Product.isActive) {
         await transaction.rollback();
+        console.log('[ORDER] ERROR_PRODUCT_UNAVAILABLE:', item.productVariantId);
         return res.status(400).json({ message: 'Uno de los productos ya no está disponible' });
       }
 
       if (variant.stock < item.quantity) {
         await transaction.rollback();
+        console.log('[ORDER] ERROR_INSUFFICIENT_STOCK:', { product: variant.Product.name, requested: item.quantity, available: variant.stock });
         return res.status(400).json({
           message: `Stock insuficiente para "${variant.Product.name}". Disponible: ${variant.stock}`
         });
@@ -33,6 +38,7 @@ export const createOrder = async (req, res) => {
       totalAmount += unitPrice * item.quantity;
       variant.stock -= item.quantity;
       await variant.save({ transaction });
+      console.log('[ORDER] SUCCESS: Stock updated:', { product: variant.Product.name, newStock: variant.stock });
 
       orderItemsData.push({
         productVariantId: variant.id,
@@ -50,13 +56,16 @@ export const createOrder = async (req, res) => {
       },
       { transaction }
     );
+    console.log('[ORDER] SUCCESS: Order created:', { orderId: order.id, total: totalAmount.toFixed(2) });
 
     await OrderItem.bulkCreate(
       orderItemsData.map(i => ({ ...i, orderId: order.id })),
       { transaction }
     );
+    console.log('[ORDER] SUCCESS: Order items saved:', orderItemsData.length);
 
     await transaction.commit();
+    console.log('[ORDER] SUCCESS: Transaction completed');
 
     const created = await Order.findByPk(order.id, {
       include: [{ model: OrderItem, include: [{ model: ProductVariant, include: [{ model: Product }] }] }]
@@ -65,7 +74,7 @@ export const createOrder = async (req, res) => {
     res.status(201).json({ message: '¡Pedido creado con éxito!', order: created });
   } catch (error) {
     await transaction.rollback();
-    console.error('Error creating order:', error);
+    console.error('[ORDER] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al crear el pedido' });
   }
 };
