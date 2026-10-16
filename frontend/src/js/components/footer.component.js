@@ -48,10 +48,10 @@ export const FOOTER_CONFIG = {
     { label: 'Involúcrate', path: 'pages/about/get-involved.html' }
   ],
   contact: {
-    phone: '+52 (442) 459-1473',
-    phoneHref: 'tel:+524424591473',
-    email: 'contacto.honatu@gmail.com',
-    emailHref: 'mailto:contacto.honatu@gmail.com'
+    phone: '+52 (442) 268-1719',
+    phoneHref: 'tel:+524422681719',
+    email: 'atencion.honatu@gmail.com',
+    emailHref: 'mailto:atencion.honatu@gmail.com'
   },
   schedule: [
     'Lunes – Viernes: 9:00 – 18:00',
