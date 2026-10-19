@@ -54,7 +54,7 @@ export const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in register:', error);
+    console.error('[AUTH] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error del servidor al registrar usuario.' });
   }
 };
@@ -109,7 +109,7 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in login:', error);
+    console.error('[AUTH] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error del servidor al iniciar sesión.' });
   }
 };
@@ -148,7 +148,7 @@ export const getMe = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error in getMe:', error);
+    console.error('[AUTH] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener datos del usuario autenticado.' });
   }
 };
@@ -193,7 +193,7 @@ export const updateProfile = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error in updateProfile:', error);
+    console.error('[AUTH] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al actualizar información del perfil.' });
   }
 };
@@ -229,7 +229,7 @@ export const changePassword = async (req, res) => {
 
     res.json({ message: 'Contraseña actualizada exitosamente.' });
   } catch (error) {
-    console.error('Error in changePassword:', error);
+    console.error('[AUTH] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al cambiar la contraseña.' });
   }
 };

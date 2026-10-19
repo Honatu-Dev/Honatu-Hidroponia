@@ -94,7 +94,7 @@ export const getMyOrders = async (req, res) => {
     });
     res.json(orders);
   } catch (error) {
-    console.error('Error in getMyOrders:', error);
+    console.error('[ORDERS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener tus pedidos.' });
   }
 };
@@ -119,7 +119,7 @@ export const getAllOrders = async (req, res) => {
     const orders = await Order.findAll(options);
     res.json(orders);
   } catch (error) {
-    console.error('Error in getAllOrders:', error);
+    console.error('[ORDERS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener los pedidos.' });
   }
 };
@@ -137,7 +137,7 @@ export const updateOrderStatus = async (req, res) => {
 
     res.json({ message: 'Estado del pedido actualizado', order });
   } catch (error) {
-    console.error('Error in updateOrderStatus:', error);
+    console.error('[ORDERS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al actualizar el pedido.' });
   }
 };

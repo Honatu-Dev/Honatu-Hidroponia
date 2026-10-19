@@ -51,7 +51,7 @@ export const getMyServiceRequests = async (req, res) => {
     });
     res.json(requests);
   } catch (error) {
-    console.error('Error in getMyServiceRequests:', error);
+    console.error('[SERVICEREQUESTS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener tus solicitudes.' });
   }
 };
@@ -84,7 +84,7 @@ export const getAllServiceRequests = async (req, res) => {
     const requests = await ServiceRequest.findAll(options);
     res.json(requests);
   } catch (error) {
-    console.error('Error in getAllServiceRequests:', error);
+    console.error('[SERVICEREQUESTS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener las solicitudes.' });
   }
 };
@@ -108,7 +108,7 @@ export const updateServiceRequestStatus = async (req, res) => {
       serviceRequest
     });
   } catch (error) {
-    console.error('Error in updateServiceRequestStatus:', error);
+    console.error('[SERVICEREQUESTS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al actualizar la solicitud.' });
   }
 };

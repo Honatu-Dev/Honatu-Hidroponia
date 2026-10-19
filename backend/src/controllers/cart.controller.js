@@ -15,7 +15,7 @@ export const getCart = async (req, res) => {
     });
     res.json(items);
   } catch (error) {
-    console.error('Error in getCart:', error);
+    console.error('[CART] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener el carrito.' });
   }
 };
@@ -84,7 +84,7 @@ export const syncCart = async (req, res) => {
     res.json(cart);
   } catch (error) {
     await transaction.rollback();
-    console.error('Error in syncCart:', error);
+    console.error('[CART] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al sincronizar el carrito.' });
   }
 };
@@ -105,7 +105,7 @@ export const updateCartItem = async (req, res) => {
     const full = await CartItem.findByPk(item.id, { include: [includeVariant] });
     res.json({ message: 'Cantidad actualizada', item: full });
   } catch (error) {
-    console.error('Error in updateCartItem:', error);
+    console.error('[CART] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al actualizar el carrito.' });
   }
 };
@@ -121,7 +121,7 @@ export const removeCartItem = async (req, res) => {
     }
     res.json({ message: 'Artículo eliminado del carrito' });
   } catch (error) {
-    console.error('Error in removeCartItem:', error);
+    console.error('[CART] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al eliminar el artículo.' });
   }
 };
@@ -132,7 +132,7 @@ export const clearCart = async (req, res) => {
     await CartItem.destroy({ where: { userId: req.user.id } });
     res.json({ message: 'Carrito vaciado' });
   } catch (error) {
-    console.error('Error in clearCart:', error);
+    console.error('[CART] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al vaciar el carrito.' });
   }
 };
