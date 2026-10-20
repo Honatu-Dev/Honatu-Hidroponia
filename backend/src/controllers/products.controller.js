@@ -28,7 +28,7 @@ export const getProducts = async (req, res) => {
     });
     res.json(products);
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('[PRODUCTS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al obtener productos' });
   }
 };
@@ -44,7 +44,7 @@ export const getProductById = async (req, res) => {
     }
     res.json(product);
   } catch (error) {
-    console.error('Error fetching product:', error);
+    console.error('[PRODUCTS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al obtener el producto' });
   }
 };
@@ -82,7 +82,7 @@ export const createProduct = async (req, res) => {
     res.status(201).json({ message: 'Producto creado exitosamente', product: created });
   } catch (error) {
     await transaction.rollback();
-    console.error('Error creating product:', error);
+    console.error('[PRODUCTS] ERROR_DATABASE:', error.message);
     if (error.name === 'SequelizeUniqueConstraintError' || error.original?.code === '23505') {
       return res.status(400).json({ message: 'Ya existe una variante con ese SKU' });
     }
@@ -110,7 +110,7 @@ export const updateProduct = async (req, res) => {
     const updated = await Product.findByPk(product.id, { include: [{ model: ProductVariant }] });
     res.json({ message: 'Producto actualizado', product: updated });
   } catch (error) {
-    console.error('Error updating product:', error);
+    console.error('[PRODUCTS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al actualizar el producto' });
   }
 };
@@ -132,7 +132,7 @@ export const updateVariant = async (req, res) => {
     await variant.save();
     res.json({ message: 'Variante actualizada', variant });
   } catch (error) {
-    console.error('Error updating variant:', error);
+    console.error('[PRODUCTS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al actualizar la variante' });
   }
 };
@@ -148,7 +148,7 @@ export const deactivateProduct = async (req, res) => {
     await product.save();
     res.json({ message: 'Producto desactivado', product });
   } catch (error) {
-    console.error('Error deactivating product:', error);
+    console.error('[PRODUCTS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al desactivar el producto' });
   }
 };

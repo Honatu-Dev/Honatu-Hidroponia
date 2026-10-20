@@ -8,7 +8,7 @@ export const getWorkshops = async (req, res) => {
     });
     res.json(workshops);
   } catch (error) {
-    console.error('Error fetching workshops:', error);
+    console.error('[WORKSHOPS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al obtener talleres' });
   }
 };
@@ -97,7 +97,7 @@ export const enrollWorkshop = async (req, res) => {
 
   } catch (error) {
     await transaction.rollback();
-    console.error('Error in enrollWorkshop:', error);
+    console.error('[WORKSHOPS] ERROR_DATABASE:', error.message);
 
     if (error.name === 'SequelizeUniqueConstraintError' || error.original?.code === '23505') {
       return res.status(400).json({ message: 'Ya estás inscrito a este taller' });
@@ -123,7 +123,7 @@ export const getMyEnrollments = async (req, res) => {
 
     res.json(enrollments);
   } catch (error) {
-    console.error('Error in getMyEnrollments:', error);
+    console.error('[WORKSHOPS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener tus inscripciones a talleres.' });
   }
 };
@@ -150,7 +150,7 @@ export const createWorkshop = async (req, res) => {
       workshop
     });
   } catch (error) {
-    console.error('Error creating workshop:', error);
+    console.error('[WORKSHOPS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al crear taller' });
   }
 };
@@ -177,7 +177,7 @@ export const updateWorkshop = async (req, res) => {
     await workshop.save();
     res.json({ message: 'Taller actualizado', workshop });
   } catch (error) {
-    console.error('Error updating workshop:', error);
+    console.error('[WORKSHOPS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al actualizar el taller' });
   }
 };
@@ -192,7 +192,7 @@ export const deleteWorkshop = async (req, res) => {
     await workshop.destroy();
     res.json({ message: 'Taller eliminado' });
   } catch (error) {
-    console.error('Error deleting workshop:', error);
+    console.error('[WORKSHOPS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al eliminar el taller' });
   }
 };
@@ -216,7 +216,7 @@ export const getAllEnrollments = async (req, res) => {
     });
     res.json(enrollments);
   } catch (error) {
-    console.error('Error in getAllEnrollments:', error);
+    console.error('[WORKSHOPS] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener las inscripciones.' });
   }
 };

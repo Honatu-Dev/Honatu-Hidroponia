@@ -23,7 +23,7 @@ export const getGuides = async (req, res) => {
     });
     res.json(guides);
   } catch (error) {
-    console.error('Error fetching guides:', error);
+    console.error('[GUIDES] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al obtener guías' });
   }
 };
@@ -39,7 +39,7 @@ export const getGuideById = async (req, res) => {
     await guide.increment('readCount');
     res.json(guide);
   } catch (error) {
-    console.error('Error fetching guide:', error);
+    console.error('[GUIDES] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al obtener la guía' });
   }
 };
@@ -62,7 +62,7 @@ export const createGuide = async (req, res) => {
 
     res.status(201).json({ message: 'Guía creada exitosamente', guide });
   } catch (error) {
-    console.error('Error creating guide:', error);
+    console.error('[GUIDES] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al crear la guía' });
   }
 };
@@ -87,7 +87,7 @@ export const updateGuide = async (req, res) => {
     await guide.save();
     res.json({ message: 'Guía actualizada', guide });
   } catch (error) {
-    console.error('Error updating guide:', error);
+    console.error('[GUIDES] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al actualizar la guía' });
   }
 };
@@ -102,7 +102,7 @@ export const deleteGuide = async (req, res) => {
     await guide.destroy();
     res.json({ message: 'Guía eliminada' });
   } catch (error) {
-    console.error('Error deleting guide:', error);
+    console.error('[GUIDES] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error en el servidor al eliminar la guía' });
   }
 };

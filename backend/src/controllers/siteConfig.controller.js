@@ -8,7 +8,7 @@ export const getSiteConfig = async (req, res) => {
     const row = await SiteConfig.findByPk(DEFAULT_KEY);
     res.json(row ? row.config : {});
   } catch (error) {
-    console.error('Error fetching site config:', error);
+    console.error('[SITECONFIG] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al obtener la configuración del sitio' });
   }
 };
@@ -26,7 +26,7 @@ export const upsertSiteConfig = async (req, res) => {
       config: row.config
     });
   } catch (error) {
-    console.error('Error saving site config:', error);
+    console.error('[SITECONFIG] ERROR_DATABASE:', error.message);
     res.status(500).json({ message: 'Error al guardar la configuración del sitio' });
   }
 };
